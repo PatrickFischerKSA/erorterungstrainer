@@ -202,6 +202,11 @@ textarea {
   color: #fff;
 }
 
+.level-hint {
+  font-size: 0.84rem;
+  color: var(--muted);
+}
+
 .feedback {
   font-size: 0.82rem;
   color: var(--muted);

@@ -24,14 +24,25 @@ const proTemplate = document.getElementById("proTemplate");
 const tendenzJa = document.getElementById("tendenzJa");
 const tendenzNein = document.getElementById("tendenzNein");
 const tendenzValue = document.getElementById("tendenzValue");
+const levelLocker = document.getElementById("levelLocker");
+const levelNormal = document.getElementById("levelNormal");
+const levelStreng = document.getElementById("levelStreng");
+const levelHint = document.getElementById("levelHint");
+let strictness = "normal";
 
 function normalizeText(text) {
   return text
     .toLowerCase()
-    .replace(/ä/g, "ae")
-    .replace(/ö/g, "oe")
-    .replace(/ü/g, "ue")
-    .replace(/ß/g, "ss");
+    .replace(/ae/g, "ae")
+    .replace(/oe/g, "oe")
+    .replace(/ue/g, "ue")
+    .replace(/a\u0308/g, "ae")
+    .replace(/o\u0308/g, "oe")
+    .replace(/u\u0308/g, "ue")
+    .replace(/\u00e4/g, "ae")
+    .replace(/\u00f6/g, "oe")
+    .replace(/\u00fc/g, "ue")
+    .replace(/\u00df/g, "ss");
 }
 
 function normalizeList(list) {
@@ -44,8 +55,10 @@ const linkWords = normalizeList([
   "somit",
   "folglich",
   "weil",
-  "da ",
+  "da",
   "dadurch",
+  "deswegen",
+  "damit",
   "das zeigt",
   "das belegt",
   "verdeutlicht",
@@ -58,19 +71,74 @@ const exampleWords = normalizeList([
   "zb",
   "etwa",
   "beispielsweise",
+  "konkret",
+  "im alltag",
 ]);
 
 const transitionWords = normalizeList([
-  "außerdem",
+  "ausserdem",
   "zudem",
-  "darüber hinaus",
+  "darueber hinaus",
   "hingegen",
   "dagegen",
   "trotzdem",
   "dennoch",
   "im gegensatz",
-  "abschließend",
+  "abschliessend",
 ]);
+
+const nonsenseWords = normalizeList([
+  "lol",
+  "haha",
+  "blabla",
+  "irgendwas",
+  "egal",
+  "keine ahnung",
+]);
+
+const stopWords = new Set(normalizeList([
+  "der",
+  "die",
+  "das",
+  "und",
+  "oder",
+  "ein",
+  "eine",
+  "einer",
+  "eines",
+  "den",
+  "dem",
+  "des",
+  "mit",
+  "ohne",
+  "fuer",
+  "von",
+  "im",
+  "in",
+  "am",
+  "an",
+  "auf",
+  "zu",
+  "ist",
+  "sind",
+  "war",
+  "wird",
+  "werden",
+  "man",
+  "ich",
+  "du",
+  "wir",
+  "sie",
+  "es",
+  "nicht",
+  "auch",
+  "nur",
+  "sehr",
+  "dass",
+  "wenn",
+  "als",
+  "bei",
+]));
 
 function setMode(mode) {
   const isLinear = mode === "linear";
@@ -92,6 +160,67 @@ function setTendenz(value) {
 
 tendenzJa.addEventListener("click", () => setTendenz("Bejahung"));
 tendenzNein.addEventListener("click", () => setTendenz("Ablehnung"));
+
+function getStrictnessConfig() {
+  if (strictness === "locker") {
+    return {
+      nonsenseMinAlpha: 16,
+      nonsenseMinUniqueRatio: 0.4,
+      minArgumentChars: 55,
+      minArgumentTokens: 6,
+      minIntroChars: 85,
+      minReasonChars: 65,
+      minReasonOverlap: 1,
+      minExampleChars: 55,
+      minTransitionChars: 22,
+      minGenericChars: 55,
+      minGenericTokens: 6,
+    };
+  }
+
+  if (strictness === "streng") {
+    return {
+      nonsenseMinAlpha: 28,
+      nonsenseMinUniqueRatio: 0.52,
+      minArgumentChars: 95,
+      minArgumentTokens: 11,
+      minIntroChars: 130,
+      minReasonChars: 105,
+      minReasonOverlap: 3,
+      minExampleChars: 95,
+      minTransitionChars: 42,
+      minGenericChars: 95,
+      minGenericTokens: 11,
+    };
+  }
+
+  return {
+    nonsenseMinAlpha: 20,
+    nonsenseMinUniqueRatio: 0.45,
+    minArgumentChars: 70,
+    minArgumentTokens: 8,
+    minIntroChars: 100,
+    minReasonChars: 80,
+    minReasonOverlap: 2,
+    minExampleChars: 70,
+    minTransitionChars: 30,
+    minGenericChars: 70,
+    minGenericTokens: 8,
+  };
+}
+
+function setStrictness(level) {
+  strictness = level;
+  levelLocker.classList.toggle("is-active", level === "locker");
+  levelNormal.classList.toggle("is-active", level === "normal");
+  levelStreng.classList.toggle("is-active", level === "streng");
+  levelHint.textContent = `Aktiv: ${level.charAt(0).toUpperCase()}${level.slice(1)}`;
+  document.querySelectorAll("textarea").forEach((area) => updateFeedback(area));
+}
+
+levelLocker.addEventListener("click", () => setStrictness("locker"));
+levelNormal.addEventListener("click", () => setStrictness("normal"));
+levelStreng.addEventListener("click", () => setStrictness("streng"));
 
 function renumber(selector, label) {
   document.querySelectorAll(selector).forEach((card, index) => {
@@ -205,7 +334,7 @@ function downloadFile(filename, blob) {
 btnTxt.addEventListener("click", () => {
   const text = buildExportText();
   const blob = new Blob([text], { type: "text/plain;charset=utf-8" });
-  downloadFile("erörterung.txt", blob);
+  downloadFile("erorterung.txt", blob);
 });
 
 btnDocx.addEventListener("click", async () => {
@@ -217,7 +346,7 @@ btnDocx.addEventListener("click", async () => {
   const paragraphs = text.split("\n").map((line) => new window.docx.Paragraph(line));
   const doc = new window.docx.Document({ sections: [{ properties: {}, children: paragraphs }] });
   const blob = await window.docx.Packer.toBlob(doc);
-  downloadFile("erörterung.docx", blob);
+  downloadFile("erorterung.docx", blob);
 });
 
 function ensureFeedbackElement(textarea) {
@@ -239,7 +368,65 @@ function hasAny(text, list) {
   return list.some((word) => text.includes(word));
 }
 
+function tokenize(text) {
+  const raw = normalizeText(text).split(/[^a-z0-9]+/g).filter(Boolean);
+  return raw.filter((w) => w.length >= 4 && !stopWords.has(w));
+}
+
+function overlapCount(a, b) {
+  const setB = new Set(b);
+  let count = 0;
+  a.forEach((token) => {
+    if (setB.has(token)) count += 1;
+  });
+  return count;
+}
+
+function repeatedWordRatio(words) {
+  if (!words.length) return 1;
+  const unique = new Set(words);
+  return unique.size / words.length;
+}
+
+function nonsenseReason(value) {
+  const cfg = getStrictnessConfig();
+  const normalized = normalizeText(value);
+  const words = normalized.split(/\s+/).filter(Boolean);
+  const alphaOnly = normalized.replace(/[^a-z]/g, "");
+
+  if (alphaOnly.length < cfg.nonsenseMinAlpha) return "Zu wenig inhaltlicher Text.";
+  if (/(.)\1{5,}/.test(normalized)) return "Viele wiederholte Zeichen ohne Inhalt.";
+  if (hasAny(normalized, nonsenseWords)) return "Umgangssprache/Fuelltext statt Argumentation.";
+  if (words.length >= 6 && repeatedWordRatio(words) < cfg.nonsenseMinUniqueRatio) {
+    return "Zu viele Wiederholungen, kaum neue Information.";
+  }
+
+  return "";
+}
+
+function getCardContext(textarea) {
+  const card = textarea.closest(".card");
+  if (!card) return { argument: "", begruendung: "", beispiel: "", widerlegung: "" };
+  const labels = card.querySelectorAll("label");
+  const context = { argument: "", begruendung: "", beispiel: "", widerlegung: "" };
+
+  labels.forEach((label) => {
+    const key = normalizeText(label.textContent.trim());
+    const field = label.nextElementSibling;
+    if (!field || field.tagName !== "TEXTAREA") return;
+    const val = field.value.trim();
+
+    if (key.includes("argument")) context.argument = val;
+    if (key.includes("begruendung") || key.includes("einschraenkung")) context.begruendung = val;
+    if (key.includes("beispiel")) context.beispiel = val;
+    if (key.includes("widerlegung")) context.widerlegung = val;
+  });
+
+  return context;
+}
+
 function updateFeedback(textarea) {
+  const cfg = getStrictnessConfig();
   ensureFeedbackElement(textarea);
   const feedback = textarea.nextElementSibling;
   const value = textarea.value.trim();
@@ -254,77 +441,86 @@ function updateFeedback(textarea) {
     return;
   }
 
+  const nonsense = nonsenseReason(value);
+  if (nonsense) {
+    feedback.textContent = `Nicht bewertbar: ${nonsense}`;
+    feedback.classList.add("bad");
+    return;
+  }
+
+  const context = getCardContext(textarea);
+  const argTokens = tokenize(context.argument);
+  const begrTokens = tokenize(context.begruendung || context.widerlegung);
+  const valTokens = tokenize(value);
+
   if (label.includes("argument")) {
-    const clear = value.length >= 60;
+    const clear = value.length >= cfg.minArgumentChars && valTokens.length >= cfg.minArgumentTokens;
     feedback.textContent = clear
       ? "Logische Schluessigkeit und Klarheit des Arguments: gut."
-      : "Logische Schluessigkeit und Klarheit des Arguments: bitte praeziser und ausfuehrlicher formulieren.";
+      : "Argument noch zu unpraezise. Formuliere einen klaren Standpunkt mit Begruendungskern.";
     feedback.classList.add(clear ? "ok" : "warn");
-    if (!clear) {
-      feedback.textContent = "Logische Schluessigkeit und Klarheit des Arguments: bitte praeziser und ausfuehrlicher formulieren.";
-    }
     return;
   }
 
   if (label.includes("einleitung")) {
     const hasQuestion = value.includes("?");
     const hasW = /(wer|was|wann|wo|warum|wie|wieso|weshalb)\b/i.test(value);
-    const hasContext = value.length >= 80 || hasAny(lower, ["hintergrund", "kontext", "aktuell", "heute", "in der gesellschaft"]);
-    if (hasW && hasContext && hasQuestion) {
-      feedback.textContent = "Einleitung: W-Fragen beantwortet, relevante Infos enthalten, Frage am Schluss gestellt.";
+    const hasContext = value.length >= cfg.minIntroChars || hasAny(lower, ["hintergrund", "kontext", "aktuell", "gesellschaft", "debatte"]);
+    const questionAtEnd = /\?\s*$/.test(value) || /\?\s*$/m.test(value.split(/[.!]/).slice(-1)[0] || "");
+
+    if (hasW && hasContext && hasQuestion && questionAtEnd) {
+      feedback.textContent = "Einleitung: W-Fragen, Kontext und explizite Leitfrage am Schluss sind vorhanden.";
       feedback.classList.add("ok");
       return;
     }
 
     const missing = [];
     if (!hasW) missing.push("W-Fragen");
-    if (!hasContext) missing.push("relevante Informationen");
-    if (!hasQuestion) missing.push("explizite Frage am Schluss");
-    feedback.textContent = `Einleitung verbessern: ${missing.join(", ")} fehlt.`;
+    if (!hasContext) missing.push("relevante Informationen/Zusaetze");
+    if (!(hasQuestion && questionAtEnd)) missing.push("explizite Frage am Schluss");
+    feedback.textContent = `Einleitung verbessern: ${missing.join(", ")}.`;
     feedback.classList.add("warn");
     return;
   }
 
   if (label.includes("begruendung") || label.includes("einschraenkung") || label.includes("widerlegung")) {
-    const linked = hasAny(lower, linkWords) || value.length >= 80;
-    feedback.textContent = linked
+    const linkedByWords = hasAny(lower, linkWords);
+    const semanticLink = argTokens.length > 0 && overlapCount(valTokens, argTokens) >= cfg.minReasonOverlap;
+    const clear = value.length >= cfg.minReasonChars && linkedByWords && semanticLink;
+
+    feedback.textContent = clear
       ? "Verknuepfung und Schluessigkeit der Erlaeuterung/Widerlegung: gut."
-      : "Verknuepfung und Schluessigkeit der Erlaeuterung/Widerlegung: zeige klar, wie es das Argument stuetzt oder entkraeftet.";
-    feedback.classList.add(linked ? "ok" : "warn");
-    if (!linked) {
-      feedback.textContent = "Verknuepfung und Schluessigkeit der Erlaeuterung/Widerlegung: zeige klar, wie es das Argument stuetzt oder entkraeftet.";
-    }
+      : "Begruendung/Widerlegung noch nicht schluessig mit dem Argument verknuepft.";
+    feedback.classList.add(clear ? "ok" : "warn");
     return;
   }
 
   if (label.includes("beispiel")) {
-    const plausible = (hasAny(lower, exampleWords) || /\d/.test(value)) && hasAny(lower, linkWords);
-    feedback.textContent = plausible
+    const concrete = hasAny(lower, exampleWords) || /\d/.test(value);
+    const withArg = argTokens.length > 0 && overlapCount(valTokens, argTokens) >= 1;
+    const withReason = begrTokens.length > 0 && overlapCount(valTokens, begrTokens) >= 1;
+    const clear = value.length >= cfg.minExampleChars && concrete && withArg && withReason;
+
+    feedback.textContent = clear
       ? "Plausibilitaet, Differenzierung und Verknuepfung des Beispiels: gut."
-      : "Plausibilitaet und Verknuepfung: nutze ein konkretes Beispiel und knuepfe es sichtbar ans Argument.";
-    feedback.classList.add(plausible ? "ok" : "warn");
-    if (!plausible) {
-      feedback.textContent = "Plausibilitaet und Verknuepfung: nutze ein konkretes Beispiel und knuepfe es sichtbar ans Argument.";
-    }
+      : "Beispiel zu unplausibel oder nicht sauber mit Argument und Erlaeuterung verknuepft.";
+    feedback.classList.add(clear ? "ok" : "warn");
     return;
   }
 
   if (label.includes("ueberleitung")) {
-    const ok = value.length >= 25 && hasAny(lower, transitionWords);
+    const ok = value.length >= cfg.minTransitionChars && hasAny(lower, transitionWords);
     feedback.textContent = ok
       ? "Ueberleitung klar verknuepft."
-      : "Ueberleitung: nutze ein Verknuepfungswort und benenne den Anschluss ans naechste Argument.";
+      : "Ueberleitung: nutze Verknuepfungswoerter und nenne den Anschluss zum naechsten Punkt.";
     feedback.classList.add(ok ? "ok" : "warn");
-    if (!ok) {
-      feedback.textContent = "Ueberleitung: nutze ein Verknuepfungswort und benenne den Anschluss ans naechste Argument.";
-    }
     return;
   }
 
-  const solid = value.length >= 60;
+  const solid = value.length >= cfg.minGenericChars && valTokens.length >= cfg.minGenericTokens;
   feedback.textContent = solid
     ? "Klar und nachvollziehbar formuliert."
-    : "Formuliere klarer und fuehre weiter aus.";
+    : "Formuliere klarer und inhaltlich genauer.";
   feedback.classList.add(solid ? "ok" : "warn");
 }
 
@@ -344,3 +540,4 @@ renumber(".linear-arg", "Argument");
 renumber(".contra-arg", "Contra");
 renumber(".pro-arg", "Pro");
 bindFeedback();
+setStrictness("normal");
