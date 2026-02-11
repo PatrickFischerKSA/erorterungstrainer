@@ -25,7 +25,20 @@ const tendenzJa = document.getElementById("tendenzJa");
 const tendenzNein = document.getElementById("tendenzNein");
 const tendenzValue = document.getElementById("tendenzValue");
 
-const linkWords = [
+function normalizeText(text) {
+  return text
+    .toLowerCase()
+    .replace(/ä/g, "ae")
+    .replace(/ö/g, "oe")
+    .replace(/ü/g, "ue")
+    .replace(/ß/g, "ss");
+}
+
+function normalizeList(list) {
+  return list.map((item) => normalizeText(item));
+}
+
+const linkWords = normalizeList([
   "deshalb",
   "daher",
   "somit",
@@ -37,17 +50,17 @@ const linkWords = [
   "das belegt",
   "verdeutlicht",
   "zeigt, dass",
-];
+]);
 
-const exampleWords = [
+const exampleWords = normalizeList([
   "zum beispiel",
   "z. b.",
   "zb",
   "etwa",
   "beispielsweise",
-];
+]);
 
-const transitionWords = [
+const transitionWords = normalizeList([
   "außerdem",
   "zudem",
   "darüber hinaus",
@@ -57,7 +70,7 @@ const transitionWords = [
   "dennoch",
   "im gegensatz",
   "abschließend",
-];
+]);
 
 function setMode(mode) {
   const isLinear = mode === "linear";
@@ -217,9 +230,9 @@ function ensureFeedbackElement(textarea) {
 
 function getLabel(textarea) {
   const labelEl = textarea.previousElementSibling;
-  if (labelEl?.tagName === "LABEL") return labelEl.textContent.trim().toLowerCase();
-  const cardTitle = textarea.closest(".card")?.querySelector("h3")?.textContent?.trim().toLowerCase();
-  return cardTitle || "text";
+  if (labelEl?.tagName === "LABEL") return normalizeText(labelEl.textContent.trim());
+  const cardTitle = textarea.closest(".card")?.querySelector("h3")?.textContent?.trim();
+  return normalizeText(cardTitle || "text");
 }
 
 function hasAny(text, list) {
@@ -230,7 +243,7 @@ function updateFeedback(textarea) {
   ensureFeedbackElement(textarea);
   const feedback = textarea.nextElementSibling;
   const value = textarea.value.trim();
-  const lower = value.toLowerCase();
+  const lower = normalizeText(value);
   const label = getLabel(textarea);
 
   feedback.classList.remove("ok", "warn", "bad");
@@ -244,7 +257,8 @@ function updateFeedback(textarea) {
   if (label.includes("argument")) {
     const clear = value.length >= 60;
     feedback.textContent = clear
-      ? "Logische Schluessigkeit und Klarheit des Arguments: gut.";
+      ? "Logische Schluessigkeit und Klarheit des Arguments: gut."
+      : "Logische Schluessigkeit und Klarheit des Arguments: bitte praeziser und ausfuehrlicher formulieren.";
     feedback.classList.add(clear ? "ok" : "warn");
     if (!clear) {
       feedback.textContent = "Logische Schluessigkeit und Klarheit des Arguments: bitte praeziser und ausfuehrlicher formulieren.";
@@ -274,7 +288,8 @@ function updateFeedback(textarea) {
   if (label.includes("begruendung") || label.includes("einschraenkung") || label.includes("widerlegung")) {
     const linked = hasAny(lower, linkWords) || value.length >= 80;
     feedback.textContent = linked
-      ? "Verknuepfung und Schluessigkeit der Erlaeuterung/Widerlegung: gut.";
+      ? "Verknuepfung und Schluessigkeit der Erlaeuterung/Widerlegung: gut."
+      : "Verknuepfung und Schluessigkeit der Erlaeuterung/Widerlegung: zeige klar, wie es das Argument stuetzt oder entkraeftet.";
     feedback.classList.add(linked ? "ok" : "warn");
     if (!linked) {
       feedback.textContent = "Verknuepfung und Schluessigkeit der Erlaeuterung/Widerlegung: zeige klar, wie es das Argument stuetzt oder entkraeftet.";
@@ -285,7 +300,8 @@ function updateFeedback(textarea) {
   if (label.includes("beispiel")) {
     const plausible = (hasAny(lower, exampleWords) || /\d/.test(value)) && hasAny(lower, linkWords);
     feedback.textContent = plausible
-      ? "Plausibilitaet, Differenzierung und Verknuepfung des Beispiels: gut.";
+      ? "Plausibilitaet, Differenzierung und Verknuepfung des Beispiels: gut."
+      : "Plausibilitaet und Verknuepfung: nutze ein konkretes Beispiel und knuepfe es sichtbar ans Argument.";
     feedback.classList.add(plausible ? "ok" : "warn");
     if (!plausible) {
       feedback.textContent = "Plausibilitaet und Verknuepfung: nutze ein konkretes Beispiel und knuepfe es sichtbar ans Argument.";
@@ -296,7 +312,8 @@ function updateFeedback(textarea) {
   if (label.includes("ueberleitung")) {
     const ok = value.length >= 25 && hasAny(lower, transitionWords);
     feedback.textContent = ok
-      ? "Ueberleitung klar verknuepft.";
+      ? "Ueberleitung klar verknuepft."
+      : "Ueberleitung: nutze ein Verknuepfungswort und benenne den Anschluss ans naechste Argument.";
     feedback.classList.add(ok ? "ok" : "warn");
     if (!ok) {
       feedback.textContent = "Ueberleitung: nutze ein Verknuepfungswort und benenne den Anschluss ans naechste Argument.";

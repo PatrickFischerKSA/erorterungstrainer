@@ -167,7 +167,7 @@ label {
 
 textarea {
   width: 100%;
-  min-height: 90px;
+  min-height: 140px;
   border-radius: 12px;
   border: 1px solid var(--stroke);
   padding: 12px;
@@ -175,6 +175,7 @@ textarea {
   font-size: 0.95rem;
   background: #fff;
   resize: vertical;
+  line-height: 1.4;
 }
 
 .toggle {
@@ -204,19 +205,26 @@ textarea {
 .feedback {
   font-size: 0.82rem;
   color: var(--muted);
-  margin-top: -6px;
+  margin-top: 6px;
+  padding: 8px 10px;
+  border: 1px dashed var(--stroke);
+  border-radius: 10px;
+  background: #fffdf8;
 }
 
 .feedback.ok {
   color: var(--ok);
+  border-color: rgba(44, 122, 63, 0.35);
 }
 
 .feedback.warn {
   color: var(--warn);
+  border-color: rgba(184, 90, 26, 0.35);
 }
 
 .feedback.bad {
   color: var(--bad);
+  border-color: rgba(155, 44, 44, 0.35);
 }
 
 .footer {
