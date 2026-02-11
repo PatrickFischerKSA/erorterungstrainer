@@ -1,47 +1,266 @@
 <!doctype html>
 <html lang="de">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Rhetorik & Logik – Start</title>
-  <meta http-equiv="refresh" content="0; url=public/index.html" />
-  <style>
-    body{
-      font-family:system-ui,-apple-system,Segoe UI,Roboto;
-      padding:24px;
-      background:#f5f7fb;
-      color:#0b1324;
-    }
-    .wrap{
-      max-width:680px;
-      margin:40px auto;
-      background:#fff;
-      padding:28px;
-      border-radius:18px;
-      box-shadow:0 12px 28px rgba(0,0,0,0.12);
-    }
-    a{color:#0b62d6; font-weight:600;}
-    .start-btn{
-      display:inline-block;
-      background:#ffb703;
-      color:#1c1400;
-      padding:16px 24px;
-      border-radius:14px;
-      font-weight:800;
-      text-decoration:none;
-      font-size:1.1rem;
-      letter-spacing:0.4px;
-      box-shadow:0 10px 20px rgba(0,0,0,0.18);
-    }
-    .hint{margin-top:16px; color:#445069;}
-  </style>
-</head>
-<body>
-  <div class="wrap">
-    <h1>Rhetorik & Logik – Memory + Tabu</h1>
-    <p>Starte das Spiel direkt im Browser:</p>
-    <p><a class="start-btn" href="public/index.html">Spiel starten</a></p>
-    <p class="hint">Für lokalen Mehrspieler bitte den Server starten und dann <code>http://localhost:3000</code> öffnen.</p>
-  </div>
-</body>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Erörterungstrainer</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <header class="hero">
+      <div class="hero__inner">
+        <div>
+          <p class="kicker">Deutsch • Schreiben • Argumentieren</p>
+          <h1>Erörterungstrainer</h1>
+          <p class="sub">
+            Übe lineare und dialektische Erörterungen Schritt für Schritt.
+            Jede Maske führt dich durch die Bausteine.
+          </p>
+        </div>
+        <div class="mode">
+          <span class="mode__label">Modus</span>
+          <div class="mode__switch" role="group" aria-label="Modus wählen">
+            <button id="btnLinear" class="mode__btn is-active" type="button">Linear</button>
+            <button id="btnDialektisch" class="mode__btn" type="button">Dialektisch</button>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <main class="container">
+      <section class="panel is-visible" aria-label="Fragestellung">
+        <div class="grid">
+          <article class="card">
+            <h3>Fragestellung & Tendenz</h3>
+            <label>Fragestellung</label>
+            <textarea id="frage" placeholder="Formuliere die Frage, die du erörtern willst."></textarea>
+            <label>Zu erwartende Tendenz</label>
+            <div class="toggle" role="group" aria-label="Tendenz wählen">
+              <button id="tendenzJa" class="toggle__btn is-active" type="button">Bejahung</button>
+              <button id="tendenzNein" class="toggle__btn" type="button">Ablehnung</button>
+            </div>
+            <input id="tendenzValue" type="hidden" value="Bejahung" />
+            <label>Bewertungsstufe</label>
+            <div class="toggle" role="group" aria-label="Bewertungsstufe wählen">
+              <button id="levelLocker" class="toggle__btn" type="button">Locker</button>
+              <button id="levelNormal" class="toggle__btn is-active" type="button">Normal</button>
+              <button id="levelStreng" class="toggle__btn" type="button">Streng</button>
+            </div>
+            <div id="levelHint" class="level-hint">Aktiv: Normal</div>
+          </article>
+        </div>
+      </section>
+
+      <section id="linear" class="panel is-visible" aria-label="Lineare Erörterung">
+        <div class="panel__head">
+          <h2>Lineare Erörterung</h2>
+          <div class="controls">
+            <button class="ghost" id="addLinear" type="button">+ Argument</button>
+            <button class="ghost" id="removeLinear" type="button">- Argument</button>
+          </div>
+        </div>
+
+        <div class="grid" id="linearGrid">
+          <article class="card">
+            <h3>Einleitung mit Leitfrage</h3>
+            <textarea placeholder="Führe ins Thema ein und formuliere am Ende die Leitfrage."></textarea>
+          </article>
+
+          <article class="card arg linear-arg">
+            <h3>Argument 1</h3>
+            <label>Argument</label>
+            <textarea placeholder="Behauptung / Standpunkt"></textarea>
+            <label>Begründung</label>
+            <textarea placeholder="Warum gilt das?"></textarea>
+            <label>Beispiel</label>
+            <textarea placeholder="Konkretes Beispiel"></textarea>
+            <label>Überleitungssatz</label>
+            <textarea placeholder="Verknüpfe zum nächsten Argument"></textarea>
+          </article>
+
+          <article class="card arg linear-arg">
+            <h3>Argument 2</h3>
+            <label>Argument</label>
+            <textarea placeholder="Behauptung / Standpunkt"></textarea>
+            <label>Begründung</label>
+            <textarea placeholder="Warum gilt das?"></textarea>
+            <label>Beispiel</label>
+            <textarea placeholder="Konkretes Beispiel"></textarea>
+            <label>Überleitungssatz</label>
+            <textarea placeholder="Verknüpfe zum nächsten Argument"></textarea>
+          </article>
+
+          <article class="card arg linear-arg">
+            <h3>Argument 3</h3>
+            <label>Argument</label>
+            <textarea placeholder="Behauptung / Standpunkt"></textarea>
+            <label>Begründung</label>
+            <textarea placeholder="Warum gilt das?"></textarea>
+            <label>Beispiel</label>
+            <textarea placeholder="Konkretes Beispiel"></textarea>
+            <label>Überleitungssatz</label>
+            <textarea placeholder="Verknüpfe zum nächsten Argument"></textarea>
+          </article>
+
+          <article class="card">
+            <h3>Schluss</h3>
+            <textarea placeholder="Fasse zusammen und formuliere deine eigene Meinung."></textarea>
+          </article>
+        </div>
+      </section>
+
+      <section id="dialektisch" class="panel" aria-label="Dialektische Erörterung">
+        <div class="panel__head">
+          <h2>Dialektische Erörterung</h2>
+          <div class="controls">
+            <button class="ghost" id="addContra" type="button">+ Contra</button>
+            <button class="ghost" id="removeContra" type="button">- Contra</button>
+            <button class="ghost" id="addPro" type="button">+ Pro</button>
+            <button class="ghost" id="removePro" type="button">- Pro</button>
+          </div>
+        </div>
+
+        <div class="grid" id="dialektischGrid">
+          <article class="card">
+            <h3>Einleitung mit Leitfrage</h3>
+            <textarea placeholder="Führe ins Thema ein und formuliere am Ende die Leitfrage."></textarea>
+          </article>
+
+          <article class="card arg contra-arg">
+            <h3>Contra 1</h3>
+            <label>Argument</label>
+            <textarea placeholder="Gegenposition"></textarea>
+            <label>Begründung / Einschränkung</label>
+            <textarea placeholder="Warum wird das behauptet? Wo liegt die Grenze?"></textarea>
+            <label>Widerlegung</label>
+            <textarea placeholder="Warum überzeugt dich das nicht?"></textarea>
+            <label>Überleitungssatz</label>
+            <textarea placeholder="Zum nächsten Contra-Argument"></textarea>
+          </article>
+
+          <article class="card arg contra-arg">
+            <h3>Contra 2</h3>
+            <label>Argument</label>
+            <textarea placeholder="Gegenposition"></textarea>
+            <label>Begründung / Einschränkung</label>
+            <textarea placeholder="Warum wird das behauptet? Wo liegt die Grenze?"></textarea>
+            <label>Widerlegung</label>
+            <textarea placeholder="Warum überzeugt dich das nicht?"></textarea>
+            <label>Überleitungssatz</label>
+            <textarea placeholder="Zum nächsten Contra-Argument"></textarea>
+          </article>
+
+          <article class="card arg contra-arg">
+            <h3>Contra 3</h3>
+            <label>Argument</label>
+            <textarea placeholder="Gegenposition"></textarea>
+            <label>Begründung / Einschränkung</label>
+            <textarea placeholder="Warum wird das behauptet? Wo liegt die Grenze?"></textarea>
+            <label>Widerlegung</label>
+            <textarea placeholder="Warum überzeugt dich das nicht?"></textarea>
+            <label>Überleitungssatz</label>
+            <textarea placeholder="Zum Wendepunkt"></textarea>
+          </article>
+
+          <article class="card" id="wendepunktCard">
+            <h3>Wendepunkt</h3>
+            <textarea placeholder="Formuliere den Übergang von Contra zu Pro."></textarea>
+          </article>
+
+          <article class="card arg pro-arg">
+            <h3>Pro 1</h3>
+            <label>Argument</label>
+            <textarea placeholder="Standpunkt"></textarea>
+            <label>Begründung</label>
+            <textarea placeholder="Warum gilt das?"></textarea>
+            <label>Beispiel</label>
+            <textarea placeholder="Konkretes Beispiel"></textarea>
+            <label>Überleitungssatz</label>
+            <textarea placeholder="Verknüpfe zum nächsten Argument"></textarea>
+          </article>
+
+          <article class="card arg pro-arg">
+            <h3>Pro 2</h3>
+            <label>Argument</label>
+            <textarea placeholder="Standpunkt"></textarea>
+            <label>Begründung</label>
+            <textarea placeholder="Warum gilt das?"></textarea>
+            <label>Beispiel</label>
+            <textarea placeholder="Konkretes Beispiel"></textarea>
+            <label>Überleitungssatz</label>
+            <textarea placeholder="Verknüpfe zum nächsten Argument"></textarea>
+          </article>
+
+          <article class="card arg pro-arg">
+            <h3>Pro 3</h3>
+            <label>Argument</label>
+            <textarea placeholder="Standpunkt"></textarea>
+            <label>Begründung</label>
+            <textarea placeholder="Warum gilt das?"></textarea>
+            <label>Beispiel</label>
+            <textarea placeholder="Konkretes Beispiel"></textarea>
+            <label>Überleitungssatz</label>
+            <textarea placeholder="Zum Schluss"></textarea>
+          </article>
+
+          <article class="card">
+            <h3>Schluss</h3>
+            <textarea placeholder="Fasse zusammen und formuliere deine eigene Meinung."></textarea>
+          </article>
+        </div>
+      </section>
+    </main>
+
+    <footer class="footer">
+      <button id="btnReset" class="ghost" type="button">Alle Felder leeren</button>
+      <button id="btnTxt" class="ghost" type="button">Als TXT herunterladen</button>
+      <button id="btnDocx" class="ghost" type="button">Als DOCX herunterladen</button>
+      <button id="btnPrint" class="primary" type="button">Als PDF drucken</button>
+    </footer>
+
+    <template id="linearTemplate">
+      <article class="card arg linear-arg">
+        <h3>Argument</h3>
+        <label>Argument</label>
+        <textarea placeholder="Behauptung / Standpunkt"></textarea>
+        <label>Begründung</label>
+        <textarea placeholder="Warum gilt das?"></textarea>
+        <label>Beispiel</label>
+        <textarea placeholder="Konkretes Beispiel"></textarea>
+        <label>Überleitungssatz</label>
+        <textarea placeholder="Verknüpfe zum nächsten Argument"></textarea>
+      </article>
+    </template>
+
+    <template id="contraTemplate">
+      <article class="card arg contra-arg">
+        <h3>Contra</h3>
+        <label>Argument</label>
+        <textarea placeholder="Gegenposition"></textarea>
+        <label>Begründung / Einschränkung</label>
+        <textarea placeholder="Warum wird das behauptet? Wo liegt die Grenze?"></textarea>
+        <label>Widerlegung</label>
+        <textarea placeholder="Warum überzeugt dich das nicht?"></textarea>
+        <label>Überleitungssatz</label>
+        <textarea placeholder="Zum nächsten Contra-Argument"></textarea>
+      </article>
+    </template>
+
+    <template id="proTemplate">
+      <article class="card arg pro-arg">
+        <h3>Pro</h3>
+        <label>Argument</label>
+        <textarea placeholder="Standpunkt"></textarea>
+        <label>Begründung</label>
+        <textarea placeholder="Warum gilt das?"></textarea>
+        <label>Beispiel</label>
+        <textarea placeholder="Konkretes Beispiel"></textarea>
+        <label>Überleitungssatz</label>
+        <textarea placeholder="Verknüpfe zum nächsten Argument"></textarea>
+      </article>
+    </template>
+
+    <script src="https://unpkg.com/docx@9.3.0/build/index.js"></script>
+    <script src="app.js"></script>
+  </body>
 </html>
