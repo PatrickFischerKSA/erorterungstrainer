@@ -166,13 +166,13 @@ function getStrictnessConfig() {
     return {
       nonsenseMinAlpha: 16,
       nonsenseMinUniqueRatio: 0.4,
-      minArgumentChars: 55,
-      minArgumentTokens: 6,
+      minArgumentChars: 32,
+      minArgumentTokens: 4,
       minIntroChars: 85,
-      minReasonChars: 65,
+      minReasonChars: 42,
       minReasonOverlap: 1,
-      minExampleChars: 55,
-      minTransitionChars: 22,
+      minExampleChars: 38,
+      minTransitionChars: 16,
       minGenericChars: 55,
       minGenericTokens: 6,
     };
@@ -182,13 +182,13 @@ function getStrictnessConfig() {
     return {
       nonsenseMinAlpha: 28,
       nonsenseMinUniqueRatio: 0.52,
-      minArgumentChars: 95,
-      minArgumentTokens: 11,
+      minArgumentChars: 65,
+      minArgumentTokens: 8,
       minIntroChars: 130,
-      minReasonChars: 105,
+      minReasonChars: 80,
       minReasonOverlap: 3,
-      minExampleChars: 95,
-      minTransitionChars: 42,
+      minExampleChars: 70,
+      minTransitionChars: 30,
       minGenericChars: 95,
       minGenericTokens: 11,
     };
@@ -197,13 +197,13 @@ function getStrictnessConfig() {
   return {
     nonsenseMinAlpha: 20,
     nonsenseMinUniqueRatio: 0.45,
-    minArgumentChars: 70,
-    minArgumentTokens: 8,
+    minArgumentChars: 45,
+    minArgumentTokens: 5,
     minIntroChars: 100,
-    minReasonChars: 80,
+    minReasonChars: 55,
     minReasonOverlap: 2,
-    minExampleChars: 70,
-    minTransitionChars: 30,
+    minExampleChars: 50,
+    minTransitionChars: 20,
     minGenericChars: 70,
     minGenericTokens: 8,
   };
@@ -530,10 +530,65 @@ function bindFeedback() {
     area.removeEventListener("input", handleInput);
     area.addEventListener("input", handleInput);
   });
+  bindArgumentChecks();
 }
 
 function handleInput(event) {
+  const card = event.target.closest(".arg");
+  if (card?.classList.contains("is-accepted")) {
+    card.classList.remove("is-accepted");
+    card.querySelector(".accepted-preview")?.remove();
+    const result = card.querySelector(".check-result");
+    if (result) {
+      result.className = "check-result";
+      result.textContent = "Geändert – bitte erneut prüfen.";
+    }
+  }
   updateFeedback(event.target);
+}
+
+function bindArgumentChecks() {
+  document.querySelectorAll(".arg").forEach((card) => {
+    if (card.querySelector(".check-argument")) return;
+
+    const actions = document.createElement("div");
+    actions.className = "argument-actions";
+    actions.innerHTML = `
+      <button class="primary check-argument" type="button">Prüfen &amp; übernehmen</button>
+      <div class="check-result" role="status" aria-live="polite">Noch nicht übernommen.</div>
+    `;
+    card.append(actions);
+    actions.querySelector("button").addEventListener("click", () => checkAndAccept(card));
+  });
+}
+
+function checkAndAccept(card) {
+  const fields = [...card.querySelectorAll("textarea")];
+  fields.forEach(updateFeedback);
+  const problems = fields.filter((field) => !field.nextElementSibling?.classList.contains("ok"));
+  const result = card.querySelector(".check-result");
+
+  if (problems.length) {
+    card.classList.remove("is-accepted");
+    card.querySelector(".accepted-preview")?.remove();
+    result.className = "check-result is-warning";
+    result.textContent = `Noch nicht eingefügt: ${problems.length} Baustein${problems.length === 1 ? "" : "e"} verbessern. Beachte die Hinweise direkt bei den Feldern.`;
+    problems[0].focus();
+    return;
+  }
+
+  card.classList.add("is-accepted");
+  card.querySelector(".accepted-preview")?.remove();
+  const preview = document.createElement("div");
+  preview.className = "accepted-preview";
+  const previewTitle = document.createElement("strong");
+  previewTitle.textContent = "In die Disposition eingefügt";
+  const previewText = document.createElement("span");
+  previewText.textContent = fields[0].value.trim();
+  preview.append(previewTitle, previewText);
+  card.append(preview);
+  result.className = "check-result is-success";
+  result.textContent = "Stimmig: Argument, Begründung, Beleg und Überleitung passen zusammen.";
 }
 
 renumber(".linear-arg", "Argument");

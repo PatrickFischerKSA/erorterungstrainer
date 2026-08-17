@@ -68,6 +68,15 @@ h1 {
   color: var(--muted);
 }
 
+.eyebrow {
+  margin: 0 0 4px;
+  color: var(--accent-dark);
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
 .mode {
   display: grid;
   gap: 8px;
@@ -155,6 +164,16 @@ h2 {
   gap: 10px;
 }
 
+.arg {
+  position: relative;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.arg.is-accepted {
+  border-color: rgba(44, 122, 63, 0.55);
+  box-shadow: 0 14px 30px rgba(44, 122, 63, 0.16);
+}
+
 .card h3 {
   margin: 0 0 6px;
   font-size: 1.1rem;
@@ -230,6 +249,46 @@ textarea {
 .feedback.bad {
   color: var(--bad);
   border-color: rgba(155, 44, 44, 0.35);
+}
+
+.argument-actions {
+  display: grid;
+  gap: 8px;
+  margin-top: 6px;
+}
+
+.argument-actions .primary {
+  width: 100%;
+}
+
+.check-result {
+  min-height: 1.4em;
+  color: var(--muted);
+  font-size: 0.86rem;
+}
+
+.check-result.is-warning {
+  color: var(--bad);
+  font-weight: 700;
+}
+
+.check-result.is-success {
+  color: var(--ok);
+  font-weight: 700;
+}
+
+.accepted-preview {
+  display: grid;
+  gap: 4px;
+  padding: 12px;
+  border-radius: 12px;
+  background: rgba(44, 122, 63, 0.09);
+  color: var(--ok);
+}
+
+.accepted-preview span {
+  color: var(--ink);
+  font-size: 0.9rem;
 }
 
 .footer {

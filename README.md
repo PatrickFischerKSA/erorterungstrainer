@@ -11,5 +11,8 @@ Einfach die `index.html` im Browser oeffnen.
 - Zwei Modi: linear und dialektisch
 - Pro Abschnitt eigene Eingabemasken
 - Argumente hinzu- oder entfernen (automatische Nummerierung)
+- Prüfworkflow: fehlerhafte/unvollständige Argumente werden mit konkreten Hinweisen abgewiesen
+- Stimmige Argumente werden sichtbar in die Disposition übernommen; Änderungen lösen eine neue Prüfung aus
+- Aufbau nach der Unterrichtsvorlage: steigende lineare Gewichtung sowie Contra–Wendepunkt–Pro
 - Export als TXT oder DOCX
 - Druck/Export als PDF ueber den Browser
