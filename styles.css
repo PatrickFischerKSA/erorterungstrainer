@@ -98,6 +98,11 @@ h1 {
   box-shadow: 0 12px 26px var(--shadow);
 }
 
+.mode__switch[hidden],
+.mode__label[hidden] {
+  display: none;
+}
+
 .mode__btn {
   border: none;
   background: transparent;
@@ -118,6 +123,164 @@ h1 {
   max-width: 1100px;
   margin: 0 auto;
   padding: 24px 20px 80px;
+}
+
+.practice {
+  margin-bottom: 28px;
+  padding: 24px;
+  border: 1px solid rgba(217, 107, 59, 0.28);
+  border-radius: 24px;
+  background: rgba(255, 250, 242, 0.82);
+  box-shadow: 0 18px 42px var(--shadow);
+}
+
+.practice[hidden] {
+  display: none;
+}
+
+.practice__top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 24px;
+}
+
+.practice__top h2,
+.practice__top p {
+  margin-top: 0;
+}
+
+.practice__top p:not(.eyebrow) {
+  max-width: 680px;
+  color: var(--muted);
+}
+
+.practice__modes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.practice-mode {
+  border: 1px solid var(--stroke);
+  border-radius: 999px;
+  padding: 9px 15px;
+  background: #fff;
+  color: var(--muted);
+  cursor: pointer;
+}
+
+.practice-mode.is-active {
+  border-color: var(--accent);
+  background: var(--accent);
+  color: #fff;
+}
+
+.topic-card {
+  margin-top: 18px;
+  padding: 22px;
+  border-radius: 18px;
+  background: var(--ink);
+  color: #fffaf2;
+}
+
+.topic-card__meta,
+.topic-card__actions,
+.practice-progress__labels {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.topic-card__meta {
+  color: rgba(255, 250, 242, 0.65);
+  font-size: 0.84rem;
+}
+
+.topic-badge {
+  padding: 5px 10px;
+  border-radius: 999px;
+  background: #d9eddf;
+  color: #205b31;
+  font-weight: 700;
+}
+
+.topic-badge.is-dialectic {
+  background: #fde1d5;
+  color: #8a3d1d;
+}
+
+.topic-card h3 {
+  margin: 18px 0;
+  max-width: 850px;
+  font-size: clamp(1.35rem, 2.5vw, 2rem);
+  line-height: 1.25;
+}
+
+.topic-tendency {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: fit-content;
+  padding: 9px 12px;
+  border: 1px solid rgba(255, 250, 242, 0.22);
+  border-radius: 12px;
+  color: rgba(255, 250, 242, 0.72);
+}
+
+.topic-tendency[hidden] {
+  display: none;
+}
+
+.topic-tendency strong {
+  color: #fff;
+}
+
+.topic-hint {
+  max-width: 850px;
+  color: rgba(255, 250, 242, 0.72);
+  line-height: 1.5;
+}
+
+.topic-card__actions {
+  justify-content: flex-start;
+  margin-top: 18px;
+}
+
+.practice-progress {
+  margin-top: 18px;
+}
+
+.practice-progress__labels {
+  margin-bottom: 8px;
+  font-size: 0.9rem;
+}
+
+.practice-progress__labels span {
+  color: var(--muted);
+}
+
+.progress-track {
+  height: 10px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: var(--stroke);
+}
+
+.progress-track span {
+  display: block;
+  width: 0;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, var(--accent), var(--ok));
+  transition: width 0.25s ease;
+}
+
+textarea[readonly] {
+  background: #f3eee5;
+  color: var(--muted);
 }
 
 .panel {
@@ -357,5 +520,23 @@ button {
   .panel__head {
     flex-direction: column;
     align-items: flex-start;
+  }
+
+  .practice__top {
+    flex-direction: column;
+  }
+}
+
+@media (max-width: 600px) {
+  .practice {
+    padding: 16px;
+    border-radius: 18px;
+  }
+
+  .practice__modes,
+  .practice-mode,
+  .topic-card__actions,
+  .topic-card__actions button {
+    width: 100%;
   }
 }

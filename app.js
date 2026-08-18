@@ -28,7 +28,59 @@ const levelLocker = document.getElementById("levelLocker");
 const levelNormal = document.getElementById("levelNormal");
 const levelStreng = document.getElementById("levelStreng");
 const levelHint = document.getElementById("levelHint");
+const btnFree = document.getElementById("btnFree");
+const btnPractice = document.getElementById("btnPractice");
+const freeModeLabel = document.getElementById("freeModeLabel");
+const freeModeSwitch = document.getElementById("freeModeSwitch");
+const practice = document.getElementById("practice");
+const practiceModeButtons = document.querySelectorAll(".practice-mode");
+const topicType = document.getElementById("topicType");
+const topicNumber = document.getElementById("topicNumber");
+const topicText = document.getElementById("topicText");
+const topicTendency = document.getElementById("topicTendency");
+const topicTendencyValue = document.getElementById("topicTendencyValue");
+const topicHint = document.getElementById("topicHint");
+const newTopic = document.getElementById("newTopic");
+const restartTopic = document.getElementById("restartTopic");
+const practiceProgressText = document.getElementById("practiceProgressText");
+const practiceProgressCount = document.getElementById("practiceProgressCount");
+const practiceProgressBar = document.getElementById("practiceProgressBar");
 let strictness = "normal";
+let workMode = "free";
+let practiceMode = "linear";
+let practiceTopicCount = 0;
+let lastTopicKey = "";
+
+const practiceTopics = {
+  linear: [
+    { text: "Warum ist regelmässiges Lesen für Jugendliche wichtiger denn je?" },
+    { text: "Was macht eine gute Lehrperson aus?" },
+    { text: "Warum sollten Jugendliche ausreichend schlafen?" },
+    { text: "Welche Fähigkeiten vermittelt ein Klassenlager?" },
+    { text: "Warum ist eine gute Schulbildung für die persönliche Zukunft bedeutsam?" },
+    { text: "Was zeichnet eine verlässliche Freundschaft aus?" },
+    { text: "Warum ist Bewegung ein wichtiger Ausgleich zum Schulalltag?" },
+    { text: "Welche Vorteile hat das Erlernen einer weiteren Sprache?" },
+    { text: "Warum sollten Jugendliche verantwortungsvoll mit Geld umgehen lernen?" },
+    { text: "Was macht Teamarbeit erfolgreich?" },
+    { text: "Warum lohnt sich freiwilliges Engagement in der Gemeinde?" },
+    { text: "Welche Bedeutung hat Kreativität für das Lernen?" },
+  ],
+  dialektisch: [
+    { text: "Soll die private Handynutzung während des gesamten Schultags verboten werden?", tendency: "Ablehnung" },
+    { text: "Sollen Hausaufgaben an Gymnasien abgeschafft werden?", tendency: "Ablehnung" },
+    { text: "Soll künstliche Intelligenz im Unterricht grundsätzlich erlaubt sein?", tendency: "Bejahung" },
+    { text: "Soll der Unterricht erst um 9 Uhr beginnen?", tendency: "Bejahung" },
+    { text: "Sollen Schulnoten bis zum Ende der Sekundarstufe abgeschafft werden?", tendency: "Ablehnung" },
+    { text: "Soll für Jugendliche ein verpflichtendes soziales Jahr eingeführt werden?", tendency: "Bejahung" },
+    { text: "Sollen soziale Medien erst ab 16 Jahren zugänglich sein?", tendency: "Bejahung" },
+    { text: "Soll an Schulen eine einheitliche Kleidung vorgeschrieben werden?", tendency: "Ablehnung" },
+    { text: "Soll der öffentliche Verkehr für Jugendliche kostenlos sein?", tendency: "Bejahung" },
+    { text: "Sollen gedruckte Schulbücher vollständig durch Tablets ersetzt werden?", tendency: "Ablehnung" },
+    { text: "Soll Fleisch in Schulmensen nur noch an einzelnen Tagen angeboten werden?", tendency: "Bejahung" },
+    { text: "Soll die Teilnahme an Schulsportwettkämpfen obligatorisch sein?", tendency: "Ablehnung" },
+  ],
+};
 
 function normalizeText(text) {
   return text
@@ -151,6 +203,117 @@ function setMode(mode) {
 btnLinear.addEventListener("click", () => setMode("linear"));
 btnDialektisch.addEventListener("click", () => setMode("dialektisch"));
 
+function setWorkMode(mode) {
+  workMode = mode;
+  const isPractice = mode === "practice";
+  practice.hidden = !isPractice;
+  btnFree.classList.toggle("is-active", !isPractice);
+  btnPractice.classList.toggle("is-active", isPractice);
+  freeModeLabel.hidden = isPractice;
+  freeModeSwitch.hidden = isPractice;
+  document.getElementById("frage").readOnly = isPractice;
+
+  if (isPractice) {
+    generatePracticeTopic();
+    practice.scrollIntoView({ behavior: "smooth", block: "start" });
+  } else {
+    topicTendency.hidden = true;
+  }
+}
+
+function setPracticeMode(mode) {
+  practiceMode = mode;
+  practiceModeButtons.forEach((button) => {
+    button.classList.toggle("is-active", button.dataset.practiceMode === mode);
+  });
+  generatePracticeTopic();
+}
+
+function choosePracticeKind() {
+  if (practiceMode !== "mixed") return practiceMode;
+  return Math.random() < 0.5 ? "linear" : "dialektisch";
+}
+
+function pickTopic(kind) {
+  const pool = practiceTopics[kind];
+  const candidates = pool.filter((item) => `${kind}:${item.text}` !== lastTopicKey);
+  return candidates[Math.floor(Math.random() * candidates.length)] || pool[0];
+}
+
+function clearWritingFields() {
+  document.querySelectorAll("#linear textarea, #dialektisch textarea").forEach((area) => {
+    area.value = "";
+    const card = area.closest(".arg");
+    card?.classList.remove("is-accepted");
+    card?.querySelector(".accepted-preview")?.remove();
+    updateFeedback(area);
+  });
+  document.querySelectorAll(".check-result").forEach((result) => {
+    result.className = "check-result";
+    result.textContent = "Noch nicht übernommen.";
+  });
+}
+
+function generatePracticeTopic() {
+  if (workMode !== "practice") return;
+  const kind = choosePracticeKind();
+  const topic = pickTopic(kind);
+  practiceTopicCount += 1;
+  lastTopicKey = `${kind}:${topic.text}`;
+
+  setMode(kind);
+  clearWritingFields();
+  document.getElementById("frage").value = topic.text;
+  updateFeedback(document.getElementById("frage"));
+
+  topicType.textContent = kind === "linear" ? "Linear" : "Dialektisch";
+  topicType.classList.toggle("is-dialectic", kind === "dialektisch");
+  topicNumber.textContent = `Thema ${practiceTopicCount}`;
+  topicText.textContent = topic.text;
+  topicTendency.hidden = kind !== "dialektisch";
+
+  if (kind === "dialektisch") {
+    topicTendencyValue.textContent = topic.tendency;
+    setTendenz(topic.tendency);
+    topicHint.textContent = topic.tendency === "Bejahung"
+      ? "Beginne mit den stärkeren Gegenargumenten. Nach dem Wendepunkt steigerst du die Argumente für die Bejahung bis zum zentralen Argument."
+      : "Beginne mit den stärkeren Argumenten der Gegenposition. Nach dem Wendepunkt steigerst du die Argumente für die Ablehnung bis zum zentralen Argument.";
+  } else {
+    topicHint.textContent = "Der Sachverhalt ist unstrittig: Begründe ihn mit wichtigen, wichtigeren und zuletzt dem zentralen Argument. Stütze jeden Punkt mit einem konkreten Beispiel.";
+  }
+
+  updatePracticeProgress();
+}
+
+function updatePracticeProgress() {
+  if (workMode !== "practice") return;
+  const activeWritingPanel = panelLinear.classList.contains("is-visible") ? panelLinear : panelDialektisch;
+  const fields = [...activeWritingPanel.querySelectorAll("textarea")];
+  const filled = fields.filter((field) => field.value.trim()).length;
+  const good = fields.filter((field) => field.nextElementSibling?.classList.contains("ok")).length;
+  const total = fields.length;
+  const percent = total ? Math.round((good / total) * 100) : 0;
+
+  practiceProgressCount.textContent = `${good} / ${total} Bausteine stimmig`;
+  practiceProgressBar.style.width = `${percent}%`;
+
+  if (!filled) practiceProgressText.textContent = "Beginne mit der Einleitung";
+  else if (good === total) practiceProgressText.textContent = "Challenge geschafft!";
+  else if (percent >= 60) practiceProgressText.textContent = "Auf der Zielgeraden";
+  else practiceProgressText.textContent = "Weiterarbeiten – die Hinweise helfen dir";
+}
+
+btnFree.addEventListener("click", () => setWorkMode("free"));
+btnPractice.addEventListener("click", () => setWorkMode("practice"));
+practiceModeButtons.forEach((button) => {
+  button.addEventListener("click", () => setPracticeMode(button.dataset.practiceMode));
+});
+newTopic.addEventListener("click", generatePracticeTopic);
+restartTopic.addEventListener("click", () => {
+  clearWritingFields();
+  updatePracticeProgress();
+});
+
 function setTendenz(value) {
   const isJa = value === "Bejahung";
   tendenzJa.classList.toggle("is-active", isJa);
@@ -216,6 +379,7 @@ function setStrictness(level) {
   levelStreng.classList.toggle("is-active", level === "streng");
   levelHint.textContent = `Aktiv: ${level.charAt(0).toUpperCase()}${level.slice(1)}`;
   document.querySelectorAll("textarea").forEach((area) => updateFeedback(area));
+  updatePracticeProgress();
 }
 
 levelLocker.addEventListener("click", () => setStrictness("locker"));
@@ -279,9 +443,18 @@ removePro.addEventListener("click", () => {
 });
 
 btnReset.addEventListener("click", () => {
-  const activePanel = document.querySelector(".panel.is-visible");
-  if (!activePanel) return;
-  activePanel.querySelectorAll("textarea").forEach((area) => {
+  if (workMode === "practice") {
+    clearWritingFields();
+    updatePracticeProgress();
+    return;
+  }
+
+  const activeWritingPanel = panelLinear.classList.contains("is-visible") ? panelLinear : panelDialektisch;
+  document.querySelectorAll("[aria-label='Fragestellung'] textarea").forEach((area) => {
+    area.value = "";
+    updateFeedback(area);
+  });
+  activeWritingPanel.querySelectorAll("textarea").forEach((area) => {
     area.value = "";
     updateFeedback(area);
   });
@@ -435,6 +608,12 @@ function updateFeedback(textarea) {
 
   feedback.classList.remove("ok", "warn", "bad");
 
+  if (textarea.id === "frage" && textarea.readOnly) {
+    feedback.textContent = "Aufsatzthema automatisch vorgegeben.";
+    feedback.classList.add("ok");
+    return;
+  }
+
   if (!value) {
     feedback.textContent = "Noch leer.";
     feedback.classList.add("bad");
@@ -464,7 +643,7 @@ function updateFeedback(textarea) {
 
   if (label.includes("einleitung")) {
     const hasQuestion = value.includes("?");
-    const hasW = /(wer|was|wann|wo|warum|wie|wieso|weshalb)\b/i.test(value);
+    const hasW = /(wer|was|wann|wo|warum|wie|wieso|weshalb|welcher|welche|welches)\b/i.test(value);
     const hasContext = value.length >= cfg.minIntroChars || hasAny(lower, ["hintergrund", "kontext", "aktuell", "gesellschaft", "debatte"]);
     const questionAtEnd = /\?\s*$/.test(value) || /\?\s*$/m.test(value.split(/[.!]/).slice(-1)[0] || "");
 
@@ -545,6 +724,7 @@ function handleInput(event) {
     }
   }
   updateFeedback(event.target);
+  updatePracticeProgress();
 }
 
 function bindArgumentChecks() {
@@ -574,6 +754,7 @@ function checkAndAccept(card) {
     result.className = "check-result is-warning";
     result.textContent = `Noch nicht eingefügt: ${problems.length} Baustein${problems.length === 1 ? "" : "e"} verbessern. Beachte die Hinweise direkt bei den Feldern.`;
     problems[0].focus();
+    updatePracticeProgress();
     return;
   }
 
@@ -589,6 +770,7 @@ function checkAndAccept(card) {
   card.append(preview);
   result.className = "check-result is-success";
   result.textContent = "Stimmig: Argument, Begründung, Beleg und Überleitung passen zusammen.";
+  updatePracticeProgress();
 }
 
 renumber(".linear-arg", "Argument");
