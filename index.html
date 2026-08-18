@@ -4,7 +4,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Erörterungstrainer</title>
-    <link rel="stylesheet" href="styles.css?v=3" />
+    <link rel="stylesheet" href="styles.css?v=4" />
   </head>
   <body>
     <header class="hero">
@@ -44,6 +44,15 @@
             <button class="practice-mode is-active" data-practice-mode="linear" type="button">Linear</button>
             <button class="practice-mode" data-practice-mode="dialektisch" type="button">Dialektisch</button>
             <button class="practice-mode" data-practice-mode="mixed" type="button">Gemischt</button>
+          </div>
+        </div>
+        <div class="challenge-picker">
+          <span>Aufgabenform</span>
+          <div class="practice__modes" role="group" aria-label="Aufgabenform wählen">
+            <button class="challenge-mode is-active" data-challenge-mode="topic" type="button">Ganzes Thema</button>
+            <button class="challenge-mode" data-challenge-mode="guided" type="button">Mit Vorgabe</button>
+            <button class="challenge-mode" data-challenge-mode="reconstruct" type="button">Rekonstruktion</button>
+            <button class="challenge-mode" data-challenge-mode="mixed" type="button">Zufall</button>
           </div>
         </div>
         <article class="topic-card">
@@ -309,6 +318,6 @@
     </template>
 
     <script src="https://unpkg.com/docx@9.3.0/build/index.js"></script>
-    <script src="app.js?v=4"></script>
+    <script src="app.js?v=5"></script>
   </body>
 </html>

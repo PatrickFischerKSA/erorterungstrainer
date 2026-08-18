@@ -34,6 +34,7 @@ const freeModeLabel = document.getElementById("freeModeLabel");
 const freeModeSwitch = document.getElementById("freeModeSwitch");
 const practice = document.getElementById("practice");
 const practiceModeButtons = document.querySelectorAll(".practice-mode");
+const challengeModeButtons = document.querySelectorAll(".challenge-mode");
 const topicType = document.getElementById("topicType");
 const topicNumber = document.getElementById("topicNumber");
 const topicText = document.getElementById("topicText");
@@ -48,6 +49,9 @@ const practiceProgressBar = document.getElementById("practiceProgressBar");
 let strictness = "normal";
 let workMode = "free";
 let practiceMode = "linear";
+let challengeMode = "topic";
+let activeChallengeMode = "topic";
+let activeExercise = null;
 let practiceTopicCount = 0;
 let lastTopicKey = "";
 let lastTopicCategory = "";
@@ -128,6 +132,139 @@ const practiceTopics = {
     { category: "Sprache", text: "Soll Englisch an Hochschulen häufiger als Unterrichtssprache eingesetzt werden?", tendency: "Ablehnung" },
     { category: "Bildung", text: "Soll jedes Gymnasium ein obligatorisches Austauschsemester anbieten?", tendency: "Ablehnung" },
     { category: "Alltag", text: "Sollen Geschäfte auch sonntags regulär geöffnet sein dürfen?", tendency: "Ablehnung" },
+  ],
+};
+
+const reconstructionExercises = {
+  linear: [
+    {
+      category: "Medien",
+      question: "Warum gehört Medienkompetenz zur modernen Allgemeinbildung?",
+      keywords: [
+        { label: "Medien", words: ["medien", "internet", "informationen"] },
+        { label: "Kompetenz", words: ["kompetenz", "kritisch", "beurteilen"] },
+        { label: "Bildung", words: ["bildung", "allgemeinbildung", "schule"] },
+      ],
+      clue: { group: "linear", index: 1, text: "Medienkompetenz hilft, falsche Informationen zu erkennen und die Glaubwürdigkeit digitaler Quellen kritisch zu beurteilen." },
+    },
+    {
+      category: "Gesundheit",
+      question: "Warum ist regelmässige Bewegung ein wichtiger Ausgleich zum Schulalltag?",
+      keywords: [
+        { label: "Bewegung", words: ["bewegung", "sport", "körperlich"] },
+        { label: "Ausgleich", words: ["ausgleich", "stress", "entspannung"] },
+        { label: "Schule", words: ["schule", "schulalltag", "lernen"] },
+      ],
+      clue: { group: "linear", index: 0, text: "Regelmässige Bewegung baut schulischen Stress ab und verbessert danach die Konzentrationsfähigkeit." },
+    },
+    {
+      category: "Demokratie",
+      question: "Warum ist politische Bildung für eine Demokratie unverzichtbar?",
+      keywords: [
+        { label: "Politik", words: ["politik", "politisch"] },
+        { label: "Bildung", words: ["bildung", "wissen", "informiert"] },
+        { label: "Demokratie", words: ["demokratie", "mitbestimmung", "wahl"] },
+      ],
+      clue: { group: "linear", index: 2, text: "Politisch gebildete Menschen können Manipulationsversuche besser erkennen und demokratische Entscheidungen informiert beurteilen." },
+    },
+    {
+      category: "Sprache",
+      question: "Welche Vorteile hat das Erlernen einer weiteren Sprache?",
+      keywords: [
+        { label: "Sprache", words: ["sprache", "fremdsprache", "sprach"] },
+        { label: "Lernen", words: ["lernen", "erlernen", "kenntnis"] },
+        { label: "Nutzen", words: ["vorteil", "nutzen", "bedeutung", "warum", "welche"] },
+      ],
+      clue: { group: "linear", index: 1, text: "Eine weitere Sprache ermöglicht direkte Begegnungen mit Menschen, deren Kultur und Denkweise sonst schwer zugänglich bleiben." },
+    },
+    {
+      category: "Alltag",
+      question: "Warum erleichtert eine gute Zeitplanung den Schulalltag?",
+      keywords: [
+        { label: "Zeitplanung", words: ["zeitplanung", "planung", "organisieren"] },
+        { label: "Schule", words: ["schule", "schulalltag", "lernen"] },
+        { label: "Erleichterung", words: ["erleichtert", "hilft", "vorteil", "warum"] },
+      ],
+      clue: { group: "linear", index: 0, text: "Ein realistischer Wochenplan verhindert, dass Prüfungen und Abgabetermine gleichzeitig zu unnötigem Stress führen." },
+    },
+    {
+      category: "Digitales",
+      question: "Warum ist der Schutz persönlicher Daten im Internet wichtig?",
+      keywords: [
+        { label: "Datenschutz", words: ["daten", "datenschutz", "persönlich"] },
+        { label: "Internet", words: ["internet", "online", "digital"] },
+        { label: "Bedeutung", words: ["wichtig", "schutz", "warum", "bedeutung"] },
+      ],
+      clue: { group: "linear", index: 2, text: "Wer persönliche Daten schützt, erschwert Identitätsdiebstahl und behält mehr Kontrolle über das eigene digitale Leben." },
+    },
+  ],
+  dialektisch: [
+    {
+      category: "Schule",
+      question: "Soll die private Handynutzung während des gesamten Schultags verboten werden?",
+      tendency: "Ablehnung",
+      keywords: [
+        { label: "Handy", words: ["handy", "smartphone", "mobiltelefon"] },
+        { label: "Schule", words: ["schule", "schultag", "unterricht"] },
+        { label: "Verbot", words: ["verbot", "verboten", "verbieten"] },
+      ],
+      clue: { group: "contra", index: 1, text: "Ein vollständiges Verbot verhindert auch sinnvolle Nutzungen, etwa für Fahrpläne, Notfälle oder kurzfristige Absprachen mit den Eltern." },
+    },
+    {
+      category: "Politik",
+      question: "Soll das Stimmrechtsalter auf 16 Jahre gesenkt werden?",
+      tendency: "Bejahung",
+      keywords: [
+        { label: "Stimmrecht", words: ["stimmrecht", "wahlrecht", "abstimmen"] },
+        { label: "Alter 16", words: ["16", "sechzehn", "jugendliche"] },
+        { label: "Senkung", words: ["senken", "gesenkt", "einführen", "soll"] },
+      ],
+      clue: { group: "pro", index: 2, text: "Politische Entscheidungen zu Bildung und Klima betreffen 16-Jährige besonders lange, weshalb sie an diesen Entscheidungen beteiligt werden sollten." },
+    },
+    {
+      category: "Umwelt",
+      question: "Sollen Kurzstreckenflüge innerhalb Europas verboten werden?",
+      tendency: "Bejahung",
+      keywords: [
+        { label: "Flüge", words: ["flug", "flüge", "kurzstrecke", "kurzstreckenflüge"] },
+        { label: "Europa", words: ["europa", "europäisch"] },
+        { label: "Verbot", words: ["verbot", "verboten", "verbieten"] },
+      ],
+      clue: { group: "contra", index: 0, text: "Ein Flugverbot könnte Regionen mit schlechten Bahnverbindungen wirtschaftlich und touristisch benachteiligen." },
+    },
+    {
+      category: "Gesundheit",
+      question: "Soll der Verkauf von Energydrinks an unter 16-Jährige verboten werden?",
+      tendency: "Bejahung",
+      keywords: [
+        { label: "Energydrinks", words: ["energydrink", "energydrinks", "koffein"] },
+        { label: "Jugendliche", words: ["jugendliche", "16", "sechzehn", "minderjährig"] },
+        { label: "Verkauf/Verbot", words: ["verkauf", "verkaufen", "verbot", "verboten"] },
+      ],
+      clue: { group: "pro", index: 1, text: "Eine Altersgrenze schützt jüngere Jugendliche vor sehr hohen Koffeinmengen, deren gesundheitliche Risiken sie leicht unterschätzen." },
+    },
+    {
+      category: "Arbeitswelt",
+      question: "Soll die Vier-Tage-Woche zum neuen Standard werden?",
+      tendency: "Bejahung",
+      keywords: [
+        { label: "Vier-Tage-Woche", words: ["vier-tage", "viertage", "vier tage", "4-tage"] },
+        { label: "Arbeit", words: ["arbeit", "arbeitswoche", "arbeitszeit"] },
+        { label: "Einführung", words: ["standard", "einführen", "werden", "soll"] },
+      ],
+      clue: { group: "contra", index: 1, text: "In Spitälern, Gastronomie und Betreuung kann eine kürzere Arbeitswoche zusätzliche Personal- und Organisationskosten verursachen." },
+    },
+    {
+      category: "Überwachung",
+      question: "Soll Videoüberwachung auf öffentlichen Plätzen deutlich ausgeweitet werden?",
+      tendency: "Ablehnung",
+      keywords: [
+        { label: "Videoüberwachung", words: ["videoüberwachung", "kameras", "überwachung"] },
+        { label: "öffentlicher Raum", words: ["öffentlich", "plätze", "raum"] },
+        { label: "Ausweitung", words: ["ausweiten", "ausgeweitet", "mehr", "soll"] },
+      ],
+      clue: { group: "contra", index: 2, text: "Eine flächendeckende Ausweitung erfasst auch unverdächtige Menschen und greift dauerhaft in ihre Privatsphäre ein." },
+    },
   ],
 };
 
@@ -266,6 +403,10 @@ function setWorkMode(mode) {
     generatePracticeTopic();
     practice.scrollIntoView({ behavior: "smooth", block: "start" });
   } else {
+    activeExercise = null;
+    activeChallengeMode = "topic";
+    unlockExerciseFields();
+    setEvaluationLock(false);
     topicTendency.hidden = true;
   }
 }
@@ -278,9 +419,23 @@ function setPracticeMode(mode) {
   generatePracticeTopic();
 }
 
+function setChallengeMode(mode) {
+  challengeMode = mode;
+  challengeModeButtons.forEach((button) => {
+    button.classList.toggle("is-active", button.dataset.challengeMode === mode);
+  });
+  generatePracticeTopic();
+}
+
 function choosePracticeKind() {
   if (practiceMode !== "mixed") return practiceMode;
   return Math.random() < 0.5 ? "linear" : "dialektisch";
+}
+
+function chooseChallengeMode() {
+  if (challengeMode !== "mixed") return challengeMode;
+  const modes = ["topic", "guided", "reconstruct"];
+  return modes[Math.floor(Math.random() * modes.length)];
 }
 
 function pickTopic(kind) {
@@ -294,7 +449,34 @@ function pickTopic(kind) {
   return candidates[Math.floor(Math.random() * candidates.length)] || pool[0];
 }
 
+function pickReconstructionExercise(kind) {
+  const pool = reconstructionExercises[kind];
+  const varied = pool.filter((item) =>
+    `${kind}:${item.question}` !== lastTopicKey && item.category !== lastTopicCategory
+  );
+  const candidates = varied.length
+    ? varied
+    : pool.filter((item) => `${kind}:${item.question}` !== lastTopicKey);
+  return candidates[Math.floor(Math.random() * candidates.length)] || pool[0];
+}
+
+function unlockExerciseFields() {
+  document.querySelectorAll("#linear textarea, #dialektisch textarea").forEach((area) => {
+    area.readOnly = false;
+    area.removeAttribute("data-given");
+  });
+  document.querySelectorAll(".arg.has-given").forEach((card) => card.classList.remove("has-given"));
+}
+
+function setEvaluationLock(locked) {
+  [levelLocker, levelNormal, levelStreng].forEach((button) => {
+    button.disabled = locked;
+  });
+  levelHint.textContent = locked ? "Aktiv: Streng · für Rekonstruktion gesperrt" : `Aktiv: ${strictness.charAt(0).toUpperCase()}${strictness.slice(1)}`;
+}
+
 function clearWritingFields() {
+  unlockExerciseFields();
   document.querySelectorAll("#linear textarea, #dialektisch textarea").forEach((area) => {
     area.value = "";
     const card = area.closest(".arg");
@@ -308,33 +490,98 @@ function clearWritingFields() {
   });
 }
 
+function applyGivenArgument(kind, clue) {
+  const selector = clue.group === "linear"
+    ? ".linear-arg"
+    : clue.group === "contra" ? ".contra-arg" : ".pro-arg";
+  const scope = kind === "linear" ? panelLinear : panelDialektisch;
+  const cards = scope.querySelectorAll(selector);
+  const card = cards[clue.index];
+  const field = card?.querySelector("textarea");
+  if (!field) return;
+
+  field.value = clue.text;
+  field.readOnly = true;
+  field.dataset.given = "true";
+  card.classList.add("has-given");
+  updateFeedback(field);
+}
+
+function resetPracticeResponse() {
+  const kind = panelLinear.classList.contains("is-visible") ? "linear" : "dialektisch";
+  const questionField = document.getElementById("frage");
+  clearWritingFields();
+
+  if (activeExercise) {
+    questionField.value = activeChallengeMode === "reconstruct" ? "" : activeExercise.question;
+    questionField.readOnly = activeChallengeMode !== "reconstruct";
+    applyGivenArgument(kind, activeExercise.clue);
+  } else {
+    questionField.readOnly = true;
+  }
+
+  updateFeedback(questionField);
+  updatePracticeProgress();
+}
+
 function generatePracticeTopic() {
   if (workMode !== "practice") return;
   const kind = choosePracticeKind();
-  const topic = pickTopic(kind);
+  activeChallengeMode = chooseChallengeMode();
+  const topic = activeChallengeMode === "topic"
+    ? pickTopic(kind)
+    : pickReconstructionExercise(kind);
+  activeExercise = activeChallengeMode === "topic" ? null : topic;
+  const question = topic.question || topic.text;
   practiceTopicCount += 1;
-  lastTopicKey = `${kind}:${topic.text}`;
+  lastTopicKey = `${kind}:${question}`;
   lastTopicCategory = topic.category;
 
   setMode(kind);
   clearWritingFields();
-  document.getElementById("frage").value = topic.text;
-  updateFeedback(document.getElementById("frage"));
+  const questionField = document.getElementById("frage");
+  questionField.value = activeChallengeMode === "reconstruct" ? "" : question;
+  questionField.readOnly = activeChallengeMode !== "reconstruct";
 
-  topicType.textContent = kind === "linear" ? "Linear" : "Dialektisch";
+  if (activeChallengeMode !== "topic") {
+    applyGivenArgument(kind, topic.clue);
+  }
+
+  if (activeChallengeMode === "reconstruct") {
+    setStrictness("streng");
+    setEvaluationLock(true);
+  } else {
+    setEvaluationLock(false);
+  }
+  updateFeedback(questionField);
+
+  const variantLabel = activeChallengeMode === "guided"
+    ? " · Mit Vorgabe"
+    : activeChallengeMode === "reconstruct" ? " · Rekonstruktion" : "";
+  topicType.textContent = `${kind === "linear" ? "Linear" : "Dialektisch"}${variantLabel}`;
   topicType.classList.toggle("is-dialectic", kind === "dialektisch");
   topicNumber.textContent = `Thema ${practiceTopicCount} · ${topic.category}`;
-  topicText.textContent = topic.text;
+  topicText.textContent = activeChallengeMode === "reconstruct"
+    ? `Ausgangsargument: „${topic.clue.text}“`
+    : question;
   topicTendency.hidden = kind !== "dialektisch";
 
   if (kind === "dialektisch") {
     topicTendencyValue.textContent = topic.tendency;
     setTendenz(topic.tendency);
-    topicHint.textContent = topic.tendency === "Bejahung"
+    const orderHint = topic.tendency === "Bejahung"
       ? "Beginne mit den stärkeren Gegenargumenten. Nach dem Wendepunkt steigerst du die Argumente für die Bejahung bis zum zentralen Argument."
       : "Beginne mit den stärkeren Argumenten der Gegenposition. Nach dem Wendepunkt steigerst du die Argumente für die Ablehnung bis zum zentralen Argument.";
+    topicHint.textContent = orderHint;
   } else {
     topicHint.textContent = "Der Sachverhalt ist unstrittig: Begründe ihn mit wichtigen, wichtigeren und zuletzt dem zentralen Argument. Stütze jeden Punkt mit einem konkreten Beispiel.";
+  }
+
+  if (activeChallengeMode === "guided") {
+    topicHint.textContent = `Ein Argument ist bereits an seiner eindeutigen Position eingesetzt. ${topicHint.textContent}`;
+  }
+  if (activeChallengeMode === "reconstruct") {
+    topicHint.textContent = `Leite zuerst die einzige passende Fragestellung aus dem vorgegebenen Argument ab. Die Prüfung verlangt alle zentralen Themenbegriffe. ${topicHint.textContent}`;
   }
 
   updatePracticeProgress();
@@ -343,7 +590,10 @@ function generatePracticeTopic() {
 function updatePracticeProgress() {
   if (workMode !== "practice") return;
   const activeWritingPanel = panelLinear.classList.contains("is-visible") ? panelLinear : panelDialektisch;
-  const fields = [...activeWritingPanel.querySelectorAll("textarea")];
+  const writingFields = [...activeWritingPanel.querySelectorAll("textarea")];
+  const fields = activeChallengeMode === "reconstruct"
+    ? [document.getElementById("frage"), ...writingFields]
+    : writingFields;
   const filled = fields.filter((field) => field.value.trim()).length;
   const good = fields.filter((field) => field.nextElementSibling?.classList.contains("ok")).length;
   const total = fields.length;
@@ -352,7 +602,9 @@ function updatePracticeProgress() {
   practiceProgressCount.textContent = `${good} / ${total} Bausteine stimmig`;
   practiceProgressBar.style.width = `${percent}%`;
 
-  if (!filled) practiceProgressText.textContent = "Beginne mit der Einleitung";
+  if (activeChallengeMode === "reconstruct" && !document.getElementById("frage").value.trim()) {
+    practiceProgressText.textContent = "Rekonstruiere zuerst die Fragestellung";
+  } else if (!filled) practiceProgressText.textContent = "Beginne mit der Einleitung";
   else if (good === total) practiceProgressText.textContent = "Challenge geschafft!";
   else if (percent >= 60) practiceProgressText.textContent = "Auf der Zielgeraden";
   else practiceProgressText.textContent = "Weiterarbeiten – die Hinweise helfen dir";
@@ -363,10 +615,12 @@ btnPractice.addEventListener("click", () => setWorkMode("practice"));
 practiceModeButtons.forEach((button) => {
   button.addEventListener("click", () => setPracticeMode(button.dataset.practiceMode));
 });
+challengeModeButtons.forEach((button) => {
+  button.addEventListener("click", () => setChallengeMode(button.dataset.challengeMode));
+});
 newTopic.addEventListener("click", generatePracticeTopic);
 restartTopic.addEventListener("click", () => {
-  clearWritingFields();
-  updatePracticeProgress();
+  resetPracticeResponse();
 });
 
 function setTendenz(value) {
@@ -428,6 +682,7 @@ function getStrictnessConfig() {
 }
 
 function setStrictness(level) {
+  if (workMode === "practice" && activeChallengeMode === "reconstruct" && level !== "streng") return;
   strictness = level;
   levelLocker.classList.toggle("is-active", level === "locker");
   levelNormal.classList.toggle("is-active", level === "normal");
@@ -662,6 +917,44 @@ function updateFeedback(textarea) {
   const label = getLabel(textarea);
 
   feedback.classList.remove("ok", "warn", "bad");
+
+  if (textarea.id === "frage" && workMode === "practice" && activeChallengeMode === "reconstruct" && activeExercise) {
+    if (!value) {
+      feedback.textContent = "Noch leer: Rekonstruiere die eindeutige Fragestellung aus dem Ausgangsargument.";
+      feedback.classList.add("bad");
+      return;
+    }
+
+    const matchedGroups = activeExercise.keywords.filter((group) =>
+      group.words.some((word) => lower.includes(normalizeText(word)))
+    );
+    const hasQuestionForm = /\?\s*$/.test(value);
+    const isDetailedEnough = value.length >= 35;
+    const exactEnough = matchedGroups.length === activeExercise.keywords.length && hasQuestionForm && isDetailedEnough;
+
+    if (exactEnough) {
+      feedback.textContent = "Eindeutige Fragestellung erkannt: Frageform und alle zentralen Themenaspekte stimmen.";
+      feedback.classList.add("ok");
+      return;
+    }
+
+    const missing = activeExercise.keywords
+      .filter((group) => !matchedGroups.includes(group))
+      .map((group) => group.label);
+    const hints = [];
+    if (missing.length) hints.push(`noch nicht eindeutig: ${missing.join(", ")}`);
+    if (!hasQuestionForm) hints.push("Fragezeichen am Schluss fehlt");
+    if (!isDetailedEnough) hints.push("Fragestellung ist zu knapp");
+    feedback.textContent = `Rekonstruktion nicht akzeptiert – ${hints.join("; ")}.`;
+    feedback.classList.add("warn");
+    return;
+  }
+
+  if (textarea.dataset.given === "true") {
+    feedback.textContent = "Vorgegebener Argumentbaustein: Themenbezug und Position sind festgelegt.";
+    feedback.classList.add("ok");
+    return;
+  }
 
   if (textarea.id === "frage" && textarea.readOnly) {
     feedback.textContent = "Aufsatzthema automatisch vorgegeben.";

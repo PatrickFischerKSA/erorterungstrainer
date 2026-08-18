@@ -161,7 +161,24 @@ h1 {
   gap: 8px;
 }
 
-.practice-mode {
+.challenge-picker {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-top: 18px;
+  padding-top: 18px;
+  border-top: 1px solid var(--stroke);
+}
+
+.challenge-picker > span {
+  color: var(--muted);
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
+.practice-mode,
+.challenge-mode {
   border: 1px solid var(--stroke);
   border-radius: 999px;
   padding: 9px 15px;
@@ -170,7 +187,8 @@ h1 {
   cursor: pointer;
 }
 
-.practice-mode.is-active {
+.practice-mode.is-active,
+.challenge-mode.is-active {
   border-color: var(--accent);
   background: var(--accent);
   color: #fff;
@@ -283,6 +301,12 @@ textarea[readonly] {
   color: var(--muted);
 }
 
+textarea[data-given="true"] {
+  border-color: rgba(217, 107, 59, 0.6);
+  background: #fff2e8;
+  color: var(--ink);
+}
+
 .panel {
   display: none;
   animation: fadeIn 0.5s ease;
@@ -337,6 +361,25 @@ h2 {
   box-shadow: 0 14px 30px rgba(44, 122, 63, 0.16);
 }
 
+.arg.has-given {
+  border-color: rgba(217, 107, 59, 0.7);
+  box-shadow: 0 14px 30px rgba(217, 107, 59, 0.16);
+}
+
+.arg.has-given::before {
+  content: "VORGEGEBEN";
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  padding: 4px 8px;
+  border-radius: 999px;
+  background: var(--accent);
+  color: #fff;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+}
+
 .card h3 {
   margin: 0 0 6px;
   font-size: 1.1rem;
@@ -382,6 +425,11 @@ textarea {
 .toggle__btn.is-active {
   background: var(--accent);
   color: #fff;
+}
+
+.toggle__btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.58;
 }
 
 .level-hint {
@@ -535,8 +583,14 @@ button {
 
   .practice__modes,
   .practice-mode,
+  .challenge-mode,
   .topic-card__actions,
   .topic-card__actions button {
     width: 100%;
+  }
+
+  .challenge-picker {
+    align-items: flex-start;
+    flex-direction: column;
   }
 }

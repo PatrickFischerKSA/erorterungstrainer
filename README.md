@@ -16,6 +16,8 @@ Einfach die `index.html` im Browser oeffnen.
 - Aufbau nach der Unterrichtsvorlage: steigende lineare Gewichtung sowie Contra–Wendepunkt–Pro
 - Übungsspiel mit automatisch zugelosten linearen und dialektischen Aufsatzthemen
 - Drei Spielarten: linear, dialektisch und gemischt
+- Flexible Aufgabenformen: vollständiges Thema, Thema mit einem fest eingesetzten Argument, strenge Rekonstruktion aus einem einzelnen Argument und Zufallsmodus
+- Kuratierte Rekonstruktionsaufgaben mit eindeutiger Argumentposition, verpflichtenden Schlüsselbegriffen und gesperrter strenger Prüfung
 - 72 abwechslungsreiche Themen aus zahlreichen Lebens- und Wissensbereichen
 - Erwartete Tendenz bei dialektischen Themen sowie Live-Fortschritt über alle Textbausteine
 - Export als TXT oder DOCX
