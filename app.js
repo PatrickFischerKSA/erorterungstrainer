@@ -50,35 +50,84 @@ let workMode = "free";
 let practiceMode = "linear";
 let practiceTopicCount = 0;
 let lastTopicKey = "";
+let lastTopicCategory = "";
 
 const practiceTopics = {
   linear: [
-    { text: "Warum ist regelmässiges Lesen für Jugendliche wichtiger denn je?" },
-    { text: "Was macht eine gute Lehrperson aus?" },
-    { text: "Warum sollten Jugendliche ausreichend schlafen?" },
-    { text: "Welche Fähigkeiten vermittelt ein Klassenlager?" },
-    { text: "Warum ist eine gute Schulbildung für die persönliche Zukunft bedeutsam?" },
-    { text: "Was zeichnet eine verlässliche Freundschaft aus?" },
-    { text: "Warum ist Bewegung ein wichtiger Ausgleich zum Schulalltag?" },
-    { text: "Welche Vorteile hat das Erlernen einer weiteren Sprache?" },
-    { text: "Warum sollten Jugendliche verantwortungsvoll mit Geld umgehen lernen?" },
-    { text: "Was macht Teamarbeit erfolgreich?" },
-    { text: "Warum lohnt sich freiwilliges Engagement in der Gemeinde?" },
-    { text: "Welche Bedeutung hat Kreativität für das Lernen?" },
+    { category: "Bildung", text: "Warum ist regelmässiges Lesen für Jugendliche wichtiger denn je?" },
+    { category: "Bildung", text: "Was macht eine gute Lehrperson aus?" },
+    { category: "Gesundheit", text: "Warum ist ausreichender Schlaf für Jugendliche wichtig?" },
+    { category: "Gemeinschaft", text: "Welche Fähigkeiten vermittelt ein Klassenlager?" },
+    { category: "Bildung", text: "Warum ist eine gute Schulbildung für die persönliche Zukunft bedeutsam?" },
+    { category: "Beziehungen", text: "Was zeichnet eine verlässliche Freundschaft aus?" },
+    { category: "Gesundheit", text: "Warum ist Bewegung ein wichtiger Ausgleich zum Schulalltag?" },
+    { category: "Sprache", text: "Welche Vorteile hat das Erlernen einer weiteren Sprache?" },
+    { category: "Alltag", text: "Warum ist ein verantwortungsvoller Umgang mit Geld wichtig?" },
+    { category: "Arbeitswelt", text: "Was macht Teamarbeit erfolgreich?" },
+    { category: "Gesellschaft", text: "Warum lohnt sich freiwilliges Engagement in der Gemeinde?" },
+    { category: "Kreativität", text: "Welche Bedeutung hat Kreativität für das Lernen?" },
+    { category: "Umwelt", text: "Warum ist der Schutz der biologischen Vielfalt wichtig?" },
+    { category: "Umwelt", text: "Welche Vorteile bietet eine gut ausgebaute Veloinfrastruktur?" },
+    { category: "Kultur", text: "Warum bereichern Museen das kulturelle Leben einer Region?" },
+    { category: "Kultur", text: "Welche Bedeutung haben Geschichten für das Verständnis anderer Menschen?" },
+    { category: "Medien", text: "Warum gehört Medienkompetenz zur modernen Allgemeinbildung?" },
+    { category: "Technik", text: "Welche Fähigkeiten brauchen Menschen im Umgang mit künstlicher Intelligenz?" },
+    { category: "Demokratie", text: "Warum ist politische Bildung für eine Demokratie unverzichtbar?" },
+    { category: "Geschichte", text: "Warum ist die Auseinandersetzung mit Geschichte für die Gegenwart wichtig?" },
+    { category: "Wissenschaft", text: "Was zeichnet glaubwürdige wissenschaftliche Informationen aus?" },
+    { category: "Arbeitswelt", text: "Warum sind Praktika für die Berufswahl hilfreich?" },
+    { category: "Persönlichkeit", text: "Welche Bedeutung hat der konstruktive Umgang mit Fehlern?" },
+    { category: "Persönlichkeit", text: "Warum ist Selbstständigkeit eine wichtige Fähigkeit?" },
+    { category: "Kommunikation", text: "Was macht ein überzeugendes Gespräch aus?" },
+    { category: "Kommunikation", text: "Warum ist aktives Zuhören für das Zusammenleben wichtig?" },
+    { category: "Gemeinschaft", text: "Welche Vorteile bieten Vereine für Jugendliche und Gemeinden?" },
+    { category: "Ernährung", text: "Warum ist eine ausgewogene Ernährung für die Leistungsfähigkeit wichtig?" },
+    { category: "Natur", text: "Welche positiven Wirkungen haben regelmässige Aufenthalte in der Natur?" },
+    { category: "Reisen", text: "Warum erweitern Reisen und Austauschprogramme den persönlichen Horizont?" },
+    { category: "Musik", text: "Welche Bedeutung hat gemeinsames Musizieren für junge Menschen?" },
+    { category: "Sport", text: "Was können Jugendliche durch Mannschaftssport lernen?" },
+    { category: "Alltag", text: "Warum erleichtert eine gute Zeitplanung den Schulalltag?" },
+    { category: "Digitales", text: "Warum ist der Schutz persönlicher Daten im Internet wichtig?" },
+    { category: "Wohnen", text: "Welche Bedeutung haben öffentliche Begegnungsorte für eine Gemeinde?" },
+    { category: "Literatur", text: "Warum können literarische Texte helfen, gesellschaftliche Konflikte zu verstehen?" },
   ],
   dialektisch: [
-    { text: "Soll die private Handynutzung während des gesamten Schultags verboten werden?", tendency: "Ablehnung" },
-    { text: "Sollen Hausaufgaben an Gymnasien abgeschafft werden?", tendency: "Ablehnung" },
-    { text: "Soll künstliche Intelligenz im Unterricht grundsätzlich erlaubt sein?", tendency: "Bejahung" },
-    { text: "Soll der Unterricht erst um 9 Uhr beginnen?", tendency: "Bejahung" },
-    { text: "Sollen Schulnoten bis zum Ende der Sekundarstufe abgeschafft werden?", tendency: "Ablehnung" },
-    { text: "Soll für Jugendliche ein verpflichtendes soziales Jahr eingeführt werden?", tendency: "Bejahung" },
-    { text: "Sollen soziale Medien erst ab 16 Jahren zugänglich sein?", tendency: "Bejahung" },
-    { text: "Soll an Schulen eine einheitliche Kleidung vorgeschrieben werden?", tendency: "Ablehnung" },
-    { text: "Soll der öffentliche Verkehr für Jugendliche kostenlos sein?", tendency: "Bejahung" },
-    { text: "Sollen gedruckte Schulbücher vollständig durch Tablets ersetzt werden?", tendency: "Ablehnung" },
-    { text: "Soll Fleisch in Schulmensen nur noch an einzelnen Tagen angeboten werden?", tendency: "Bejahung" },
-    { text: "Soll die Teilnahme an Schulsportwettkämpfen obligatorisch sein?", tendency: "Ablehnung" },
+    { category: "Schule", text: "Soll die private Handynutzung während des gesamten Schultags verboten werden?", tendency: "Ablehnung" },
+    { category: "Schule", text: "Sollen Hausaufgaben an Gymnasien abgeschafft werden?", tendency: "Ablehnung" },
+    { category: "Technik", text: "Soll künstliche Intelligenz im Unterricht grundsätzlich erlaubt sein?", tendency: "Bejahung" },
+    { category: "Schule", text: "Soll der Unterricht erst um 9 Uhr beginnen?", tendency: "Bejahung" },
+    { category: "Schule", text: "Sollen Schulnoten bis zum Ende der Sekundarstufe abgeschafft werden?", tendency: "Ablehnung" },
+    { category: "Gesellschaft", text: "Soll für Jugendliche ein verpflichtendes soziales Jahr eingeführt werden?", tendency: "Bejahung" },
+    { category: "Medien", text: "Sollen soziale Medien erst ab 16 Jahren zugänglich sein?", tendency: "Bejahung" },
+    { category: "Schule", text: "Soll an Schulen eine einheitliche Kleidung vorgeschrieben werden?", tendency: "Ablehnung" },
+    { category: "Mobilität", text: "Soll der öffentliche Verkehr für Jugendliche kostenlos sein?", tendency: "Bejahung" },
+    { category: "Digitales", text: "Sollen gedruckte Schulbücher vollständig durch Tablets ersetzt werden?", tendency: "Ablehnung" },
+    { category: "Ernährung", text: "Soll Fleisch in Schulmensen nur noch an einzelnen Tagen angeboten werden?", tendency: "Bejahung" },
+    { category: "Sport", text: "Soll die Teilnahme an Schulsportwettkämpfen obligatorisch sein?", tendency: "Ablehnung" },
+    { category: "Umwelt", text: "Sollen Kurzstreckenflüge innerhalb Europas verboten werden?", tendency: "Bejahung" },
+    { category: "Umwelt", text: "Soll auf Einwegverpackungen eine deutlich höhere Abgabe erhoben werden?", tendency: "Bejahung" },
+    { category: "Mobilität", text: "Sollen Innenstädte grundsätzlich autofrei werden?", tendency: "Bejahung" },
+    { category: "Energie", text: "Soll der Bau neuer Kernkraftwerke wieder erlaubt werden?", tendency: "Ablehnung" },
+    { category: "Politik", text: "Soll das Stimmrechtsalter auf 16 Jahre gesenkt werden?", tendency: "Bejahung" },
+    { category: "Politik", text: "Soll in der Schweiz eine allgemeine Wahlpflicht eingeführt werden?", tendency: "Ablehnung" },
+    { category: "Medien", text: "Sollen Influencer bezahlte Werbung noch deutlicher kennzeichnen müssen?", tendency: "Bejahung" },
+    { category: "Medien", text: "Soll an Schulen ein verpflichtendes Fach Medienkunde eingeführt werden?", tendency: "Bejahung" },
+    { category: "Kultur", text: "Soll der Eintritt in staatliche Museen für alle kostenlos sein?", tendency: "Bejahung" },
+    { category: "Kultur", text: "Sollen öffentliche Gelder stärker zur Förderung von Computerspielen eingesetzt werden?", tendency: "Bejahung" },
+    { category: "Arbeitswelt", text: "Soll die Vier-Tage-Woche zum neuen Standard werden?", tendency: "Bejahung" },
+    { category: "Arbeitswelt", text: "Soll Homeoffice in geeigneten Berufen gesetzlich garantiert werden?", tendency: "Bejahung" },
+    { category: "Gesundheit", text: "Soll der Verkauf von Energydrinks an unter 16-Jährige verboten werden?", tendency: "Bejahung" },
+    { category: "Gesundheit", text: "Soll eine Zuckersteuer auf stark gesüsste Getränke eingeführt werden?", tendency: "Bejahung" },
+    { category: "Sport", text: "Sollen besonders riskante Extremsportarten stärker reguliert werden?", tendency: "Bejahung" },
+    { category: "Überwachung", text: "Soll Videoüberwachung auf öffentlichen Plätzen deutlich ausgeweitet werden?", tendency: "Ablehnung" },
+    { category: "Digitales", text: "Soll die anonyme Nutzung sozialer Netzwerke verboten werden?", tendency: "Ablehnung" },
+    { category: "Wissenschaft", text: "Sollen Tierversuche für medizinische Forschung grundsätzlich verboten werden?", tendency: "Ablehnung" },
+    { category: "Stadt", text: "Sollen leer stehende Wohnungen höher besteuert werden?", tendency: "Bejahung" },
+    { category: "Tourismus", text: "Sollen stark besuchte Ferienorte eine zusätzliche Tourismusabgabe erheben?", tendency: "Bejahung" },
+    { category: "Konsum", text: "Soll Werbung für besonders klimaschädliche Produkte eingeschränkt werden?", tendency: "Bejahung" },
+    { category: "Sprache", text: "Soll Englisch an Hochschulen häufiger als Unterrichtssprache eingesetzt werden?", tendency: "Ablehnung" },
+    { category: "Bildung", text: "Soll jedes Gymnasium ein obligatorisches Austauschsemester anbieten?", tendency: "Ablehnung" },
+    { category: "Alltag", text: "Sollen Geschäfte auch sonntags regulär geöffnet sein dürfen?", tendency: "Ablehnung" },
   ],
 };
 
@@ -236,7 +285,12 @@ function choosePracticeKind() {
 
 function pickTopic(kind) {
   const pool = practiceTopics[kind];
-  const candidates = pool.filter((item) => `${kind}:${item.text}` !== lastTopicKey);
+  const variedCandidates = pool.filter((item) =>
+    `${kind}:${item.text}` !== lastTopicKey && item.category !== lastTopicCategory
+  );
+  const candidates = variedCandidates.length
+    ? variedCandidates
+    : pool.filter((item) => `${kind}:${item.text}` !== lastTopicKey);
   return candidates[Math.floor(Math.random() * candidates.length)] || pool[0];
 }
 
@@ -260,6 +314,7 @@ function generatePracticeTopic() {
   const topic = pickTopic(kind);
   practiceTopicCount += 1;
   lastTopicKey = `${kind}:${topic.text}`;
+  lastTopicCategory = topic.category;
 
   setMode(kind);
   clearWritingFields();
@@ -268,7 +323,7 @@ function generatePracticeTopic() {
 
   topicType.textContent = kind === "linear" ? "Linear" : "Dialektisch";
   topicType.classList.toggle("is-dialectic", kind === "dialektisch");
-  topicNumber.textContent = `Thema ${practiceTopicCount}`;
+  topicNumber.textContent = `Thema ${practiceTopicCount} · ${topic.category}`;
   topicText.textContent = topic.text;
   topicTendency.hidden = kind !== "dialektisch";
 
