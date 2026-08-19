@@ -4,7 +4,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Erörterungstrainer</title>
-    <link rel="stylesheet" href="styles.css?v=4" />
+    <link rel="stylesheet" href="styles.css?v=5" />
   </head>
   <body>
     <header class="hero">
@@ -266,10 +266,29 @@
           </article>
         </div>
       </section>
+
+      <section id="generatorPanel" class="generator-panel" aria-label="Aufsatzentwurf" hidden>
+        <div class="generator-panel__head">
+          <div>
+            <p class="eyebrow">Aus deiner geprüften Disposition</p>
+            <h2>Zusammenhängender Aufsatzentwurf</h2>
+          </div>
+          <button id="closeGenerator" class="ghost" type="button">Schliessen</button>
+        </div>
+        <p id="generatorStatus" class="generator-status" role="status" aria-live="polite"></p>
+        <textarea id="generatedText" class="generated-text" aria-label="Generierter Aufsatzentwurf"></textarea>
+        <div class="generator-actions">
+          <button id="copyGenerated" class="primary" type="button">Text kopieren</button>
+          <button id="downloadGeneratedTxt" class="ghost" type="button">Entwurf als TXT</button>
+          <button id="downloadGeneratedDocx" class="ghost" type="button">Entwurf als DOCX</button>
+        </div>
+        <p class="generator-note">Der Generator arbeitet vollständig lokal und ergänzt keine neuen Sachinformationen. Prüfe Sprache, Übergänge und inhaltliche Genauigkeit vor der Abgabe.</p>
+      </section>
     </main>
 
     <footer class="footer">
       <button id="btnReset" class="ghost" type="button">Alle Felder leeren</button>
+      <button id="btnGenerate" class="primary" type="button">Aufsatzentwurf erzeugen</button>
       <button id="btnTxt" class="ghost" type="button">Als TXT herunterladen</button>
       <button id="btnDocx" class="ghost" type="button">Als DOCX herunterladen</button>
       <button id="btnPrint" class="primary" type="button">Als PDF drucken</button>
@@ -318,6 +337,6 @@
     </template>
 
     <script src="https://unpkg.com/docx@9.3.0/build/index.js"></script>
-    <script src="app.js?v=5"></script>
+    <script src="app.js?v=6"></script>
   </body>
 </html>

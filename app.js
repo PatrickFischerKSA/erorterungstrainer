@@ -6,6 +6,14 @@ const btnReset = document.getElementById("btnReset");
 const btnPrint = document.getElementById("btnPrint");
 const btnTxt = document.getElementById("btnTxt");
 const btnDocx = document.getElementById("btnDocx");
+const btnGenerate = document.getElementById("btnGenerate");
+const generatorPanel = document.getElementById("generatorPanel");
+const generatorStatus = document.getElementById("generatorStatus");
+const generatedText = document.getElementById("generatedText");
+const closeGenerator = document.getElementById("closeGenerator");
+const copyGenerated = document.getElementById("copyGenerated");
+const downloadGeneratedTxt = document.getElementById("downloadGeneratedTxt");
+const downloadGeneratedDocx = document.getElementById("downloadGeneratedDocx");
 
 const linearGrid = document.getElementById("linearGrid");
 const dialektischGrid = document.getElementById("dialektischGrid");
@@ -688,7 +696,7 @@ function setStrictness(level) {
   levelNormal.classList.toggle("is-active", level === "normal");
   levelStreng.classList.toggle("is-active", level === "streng");
   levelHint.textContent = `Aktiv: ${level.charAt(0).toUpperCase()}${level.slice(1)}`;
-  document.querySelectorAll("textarea").forEach((area) => updateFeedback(area));
+  document.querySelectorAll("textarea:not(#generatedText)").forEach((area) => updateFeedback(area));
   updatePracticeProgress();
 }
 
@@ -753,9 +761,12 @@ removePro.addEventListener("click", () => {
 });
 
 btnReset.addEventListener("click", () => {
+  generatorPanel.hidden = true;
+  generatedText.value = "";
+  generatorStatus.textContent = "";
+
   if (workMode === "practice") {
-    clearWritingFields();
-    updatePracticeProgress();
+    resetPracticeResponse();
     return;
   }
 
@@ -813,6 +824,166 @@ function downloadFile(filename, blob) {
   link.click();
   setTimeout(() => URL.revokeObjectURL(link.href), 5000);
 }
+
+function completeSentence(value) {
+  const text = value.trim().replace(/\s+/g, " ");
+  if (!text) return "";
+  return /[.!?…]$/.test(text) ? text : `${text}.`;
+}
+
+function cardValues(card) {
+  const values = {};
+  card.querySelectorAll("textarea").forEach((field) => {
+    const label = field.previousElementSibling?.tagName === "LABEL"
+      ? normalizeText(field.previousElementSibling.textContent.trim())
+      : "text";
+    const value = completeSentence(field.value);
+    if (label.includes("argument")) values.argument = value;
+    else if (label.includes("begruendung")) values.begruendung = value;
+    else if (label.includes("beispiel")) values.beispiel = value;
+    else if (label.includes("widerlegung")) values.widerlegung = value;
+    else if (label.includes("ueberleitung")) values.ueberleitung = value;
+    else values.text = value;
+  });
+  return values;
+}
+
+function validateDisposition() {
+  const activePanel = panelLinear.classList.contains("is-visible") ? panelLinear : panelDialektisch;
+  const question = document.getElementById("frage");
+  const fields = [...activePanel.querySelectorAll("textarea")];
+  const empty = fields.filter((field) => !field.value.trim());
+  const notReady = fields.filter((field) => !field.nextElementSibling?.classList.contains("ok"));
+  const uncheckedCards = [...activePanel.querySelectorAll(".arg")]
+    .filter((card) => !card.classList.contains("is-accepted"));
+  const messages = [];
+
+  if (!question.value.trim()) messages.push("die Fragestellung fehlt");
+  if (empty.length) messages.push(`${empty.length} Textfeld${empty.length === 1 ? " ist" : "er sind"} leer`);
+  if (notReady.length) messages.push(`${notReady.length} Baustein${notReady.length === 1 ? " braucht" : "e brauchen"} noch eine Überarbeitung`);
+  if (uncheckedCards.length) messages.push(`${uncheckedCards.length} Argument${uncheckedCards.length === 1 ? " wurde" : "e wurden"} noch nicht geprüft und übernommen`);
+
+  return { valid: messages.length === 0, messages, activePanel };
+}
+
+function buildLinearEssay(panel) {
+  const cards = [...panel.querySelectorAll(".card")];
+  const introduction = completeSentence(cards[0].querySelector("textarea").value);
+  const conclusion = completeSentence(cards[cards.length - 1].querySelector("textarea").value);
+  const argumentCards = [...panel.querySelectorAll(".linear-arg")];
+  const openings = [
+    "Zunächst ist ein wichtiger Gesichtspunkt zu betrachten:",
+    "Noch stärker fällt ein weiterer Aspekt ins Gewicht:",
+    "Am überzeugendsten ist schliesslich das zentrale Argument:",
+  ];
+
+  const body = argumentCards.map((card, index) => {
+    const values = cardValues(card);
+    const opening = openings[index] || "Darüber hinaus ist zu beachten:";
+    return [
+      `${opening} ${values.argument}`,
+      values.begruendung,
+      `Ein konkretes Beispiel verdeutlicht dies: ${values.beispiel}`,
+      values.ueberleitung,
+    ].filter(Boolean).join(" ");
+  });
+
+  return [introduction, ...body, conclusion];
+}
+
+function buildDialecticalEssay(panel) {
+  const cards = [...panel.querySelectorAll(".card")];
+  const introduction = completeSentence(cards[0].querySelector("textarea").value);
+  const conclusion = completeSentence(cards[cards.length - 1].querySelector("textarea").value);
+  const contraCards = [...panel.querySelectorAll(".contra-arg")];
+  const proCards = [...panel.querySelectorAll(".pro-arg")];
+  const wendepunkt = completeSentence(panel.querySelector("#wendepunktCard textarea").value);
+
+  const contra = contraCards.map((card, index) => {
+    const values = cardValues(card);
+    const opening = index === 0
+      ? "Zunächst ist die Gegenposition zu berücksichtigen:"
+      : index === contraCards.length - 1
+        ? "Als stärkstes Argument der Gegenposition wird angeführt:"
+        : "Ein weiterer Einwand lautet:";
+    return [
+      `${opening} ${values.argument}`,
+      `Zur Begründung wird geltend gemacht: ${values.begruendung}`,
+      `Dem lässt sich jedoch entgegenhalten: ${values.widerlegung}`,
+      values.ueberleitung,
+    ].filter(Boolean).join(" ");
+  });
+
+  const pro = proCards.map((card, index) => {
+    const values = cardValues(card);
+    const opening = index === 0
+      ? "Für die eigene Position spricht zunächst:"
+      : index === proCards.length - 1
+        ? "Entscheidend ist schliesslich das stärkste Argument:"
+        : "Zusätzlich spricht dafür:";
+    return [
+      `${opening} ${values.argument}`,
+      values.begruendung,
+      `Dies zeigt sich beispielsweise daran: ${values.beispiel}`,
+      values.ueberleitung,
+    ].filter(Boolean).join(" ");
+  });
+
+  return [introduction, ...contra, wendepunkt, ...pro, conclusion];
+}
+
+function generateEssay() {
+  const validation = validateDisposition();
+  generatorPanel.hidden = false;
+
+  if (!validation.valid) {
+    generatedText.value = "";
+    generatorStatus.className = "generator-status is-warning";
+    generatorStatus.textContent = `Noch kein Text erzeugt: ${validation.messages.join("; ")}.`;
+    generatorPanel.scrollIntoView({ behavior: "smooth", block: "start" });
+    return;
+  }
+
+  const question = document.getElementById("frage").value.trim();
+  const paragraphs = panelLinear.classList.contains("is-visible")
+    ? buildLinearEssay(validation.activePanel)
+    : buildDialecticalEssay(validation.activePanel);
+  generatedText.value = `${question}\n\n${paragraphs.filter(Boolean).join("\n\n")}`;
+  generatorStatus.className = "generator-status is-success";
+  generatorStatus.textContent = "Der lokale Entwurf wurde aus allen geprüften Bausteinen zusammengesetzt und kann direkt überarbeitet werden.";
+  generatorPanel.scrollIntoView({ behavior: "smooth", block: "start" });
+}
+
+btnGenerate.addEventListener("click", generateEssay);
+closeGenerator.addEventListener("click", () => {
+  generatorPanel.hidden = true;
+});
+copyGenerated.addEventListener("click", async () => {
+  if (!generatedText.value.trim()) return;
+  try {
+    await navigator.clipboard.writeText(generatedText.value);
+    generatorStatus.className = "generator-status is-success";
+    generatorStatus.textContent = "Der Aufsatzentwurf wurde in die Zwischenablage kopiert.";
+  } catch {
+    generatorStatus.className = "generator-status is-warning";
+    generatorStatus.textContent = "Kopieren wurde vom Browser blockiert. Markiere den Entwurf und kopiere ihn manuell.";
+  }
+});
+downloadGeneratedTxt.addEventListener("click", () => {
+  if (!generatedText.value.trim()) return;
+  downloadFile("aufsatzentwurf.txt", new Blob([generatedText.value], { type: "text/plain;charset=utf-8" }));
+});
+downloadGeneratedDocx.addEventListener("click", async () => {
+  if (!generatedText.value.trim()) return;
+  if (!window.docx) {
+    generatorStatus.className = "generator-status is-warning";
+    generatorStatus.textContent = "Die DOCX-Bibliothek konnte nicht geladen werden.";
+    return;
+  }
+  const paragraphs = generatedText.value.split("\n").map((line) => new window.docx.Paragraph(line));
+  const doc = new window.docx.Document({ sections: [{ properties: {}, children: paragraphs }] });
+  downloadFile("aufsatzentwurf.docx", await window.docx.Packer.toBlob(doc));
+});
 
 btnTxt.addEventListener("click", () => {
   const text = buildExportText();
@@ -1052,7 +1223,7 @@ function updateFeedback(textarea) {
 }
 
 function bindFeedback() {
-  document.querySelectorAll("textarea").forEach((area) => {
+  document.querySelectorAll("textarea:not(#generatedText)").forEach((area) => {
     ensureFeedbackElement(area);
     area.removeEventListener("input", handleInput);
     area.addEventListener("input", handleInput);

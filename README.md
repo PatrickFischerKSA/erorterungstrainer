@@ -20,5 +20,6 @@ Einfach die `index.html` im Browser oeffnen.
 - Kuratierte Rekonstruktionsaufgaben mit eindeutiger Argumentposition, verpflichtenden Schlüsselbegriffen und gesperrter strenger Prüfung
 - 72 abwechslungsreiche Themen aus zahlreichen Lebens- und Wissensbereichen
 - Erwartete Tendenz bei dialektischen Themen sowie Live-Fortschritt über alle Textbausteine
+- Lokaler Textgenerator: Setzt eine vollständig geprüfte Disposition ohne API oder Datenübertragung zu einem überarbeitbaren Aufsatzentwurf zusammen
 - Export als TXT oder DOCX
 - Druck/Export als PDF ueber den Browser
